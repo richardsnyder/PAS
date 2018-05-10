@@ -1,4 +1,5 @@
-SELECT DISTINCT p.RetailYear
+SELECT DISTINCT 'PayDates by Year' Parent
+, p.RetailYear
 , CASE WHEN p.RetailPeriod < 5 THEN  CAST(p.RetailYear AS VARCHAR(4))+ '_Q1'
        WHEN p.RetailPeriod > 4 AND p.RetailPeriod < 7 THEN  CAST(p.RetailYear AS VARCHAR(4))+ '_Q2'
        WHEN p.RetailPeriod > 6 AND p.RetailPeriod < 10 THEN  CAST(p.RetailYear AS VARCHAR(4))+ '_Q3' 
