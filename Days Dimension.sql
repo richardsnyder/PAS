@@ -1,6 +1,6 @@
 SELECT DISTINCT 'AllDays' LEVLE1 
   , CONVERT(VARCHAR(12),DimDate.CalendarDate, 112) LEVEL2 
-  , CAST(DimDate.RetailYear AS VARCHAR(4) ) Retailyear 
+  , CAST(DimDate.RetailYear AS VARCHAR(4) ) RetailYear 
   , CAST(FORMAT(DimDate.RetailPeriod,'\P00') AS VARCHAR(3)) RetailMonth 
   , DimDate.RetailPeriod RetailMonthValue 
   , CAST(FORMAT(DimDate.RetailWeek, 'WK00') AS VARCHAR(4)) RetailWeek 
