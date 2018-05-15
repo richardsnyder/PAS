@@ -1,0 +1,36 @@
+DECLARE @EmailText VARCHAR(MAX) = ''
+DECLARE @JobHistoryTableHtmlBody VARCHAR(MAX) = ''
+DECLARE @Result VARCHAR(20) = ''
+DECLARE @EmailHtmlBody VARCHAR(MAX)
+DECLARE @Subject VARCHAR(MAX) = ''
+DECLARE @ResultSeverity VARCHAR(20) = ''
+DECLARE @Recipients VARCHAR(250)
+DECLARE @CurrentJobName VARCHAR(255)
+
+--Get a HTML table of the results of the job
+EXEC dbo.GetLastJobHistoryAsHtml @JobId = $(ESCAPE_SQUOTE(JOBID)), @EmailBody = @JobHistoryTableHtmlBody OUTPUT, @Result = @Result OUTPUT
+
+IF @JobHistoryTableHtmlBody IS NULL
+BEGIN
+  SET @JobHistoryTableHtmlBody = 'No Job History could be found'
+END
+
+--Get the job name
+SELECT @CurrentJobName = name from msdb.dbo.sysjobs where job_id = $(ESCAPE_SQUOTE(JOBID))
+
+--Get the email address that this email will be sent to
+SET @Recipients = dbo.GetConfiguration('EmailAlertRecipients')
+
+SET @ResultSeverity = 'Success'
+SET @Subject = 'Lexer Data Extract Completed Successfully'
+
+SET @EmailHtmlBody = '
+The extract of data for Lexer has completed successfully.<br /><br />
+
+<strong>Server:</strong>  ' + @@SERVERNAME + '<br />
+<strong>Job Name:</strong>  ' + @CurrentJobName + '<br />
+<strong>Run time:</strong>  ' + CONVERT(VARCHAR(19),GETDATE()) + '<br />
+<strong>Job Step Results:</strong><br /><br />
+' + @JobHistoryTableHtmlBody
+
+EXEC dbo.SendAlert @recipients = @Recipients, @severity = @ResultSeverity, @subject = @Subject, @email_body = @EmailHtmlBody
