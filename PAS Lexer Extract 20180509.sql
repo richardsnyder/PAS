@@ -49,7 +49,8 @@ AS (
     ,FactRetailSales.WarehouseDispatchTypeId
   FROM FactRetailSales
   WHERE 1 = 1
-AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
+--AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
+  AND FactRetailSales.SaleDate BETWEEN '29-Jul-2015' AND '07-May-2018'
   GROUP BY FactRetailSales.HeaderSourceKey
     ,FactRetailSales.TransactionNumber
     ,FactRetailSales.SaleDate
@@ -105,8 +106,13 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
   ,CASE 
     WHEN DimProfitCentre.ProfitCentreType = 'EC'
       OR RetailSales.WarehouseDispatchTypeId IN (1,2,3)
-      THEN 'Web'
-    ELSE MatWarehouse.LocationTypeName --'In-store'
+      THEN 'Online'
+    WHEN DimProfitCentre.ProfitCentreType = 'RT'
+      THEN 'Boutiques'
+    WHEN DimProfitCentre.ProfitCentreType = 'CO'
+      THEN 'Concession'
+    WHEN DimProfitCentre.ProfitCentreType = 'OU'
+      THEN 'Outlets'          
     END AS [channel]
   ,MatWarehouse.ProfitCentreCode AS [store_code]
   ,MatWarehouse.WarehouseName AS [store_name]

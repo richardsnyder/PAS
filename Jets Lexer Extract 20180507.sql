@@ -48,7 +48,8 @@ AS (
     END) AS PriceOverrideExcludingTaxForeign
  FROM JetsDataWarehouse.dbo.FactRetailSales
  WHERE 1=1
- AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
+   AND FactRetailSales.SaleDate BETWEEN '29-Jul-2015' AND '07-May-2018'
+ --AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
  GROUP BY FactRetailSales.HeaderSourceKey
   ,FactRetailSales.TransactionNumber
   ,FactRetailSales.SaleDate
@@ -98,9 +99,14 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
  ,MatProduct.ColourName AS [colour]
  ,CASE 
   WHEN MapProfitCentre.ProfitCentreType = 'EC'
-   THEN 'Web'
-  ELSE 'In-store'
-  END AS [channel]
+   THEN 'Online'
+  WHEN MapProfitCentre.ProfitCentreType = 'RT'
+   THEN 'Boutiques'
+  WHEN MapProfitCentre.ProfitCentreType = 'CO'
+   THEN 'Concession'
+  WHEN MapProfitCentre.ProfitCentreType = 'OU'
+   THEN 'Outlets'      
+ END AS [channel]
  ,MapProfitCentre.PasProfitCentreCode AS [store_code]
  ,MatWarehouse.WarehouseName AS [store_name]
  ,CASE 
