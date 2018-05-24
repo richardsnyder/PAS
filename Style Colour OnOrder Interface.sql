@@ -19,8 +19,13 @@ FROM DataWarehouse.dbo.FactWholesaleOrders
     LEFT JOIN DataWarehouse.dbo.MatProduct 
     ON MatProduct.ProductId = FactWholesaleOrders.ProductId
 WHERE 1=1
-  AND FactWholesaleOrders.SnapshotDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) -- AND factwholesaleorders.DueDate >= @CurrentFinYearStart
-  AND MatProduct.PatternMakerId = 17 -- DWPlanned
+    AND FactWholesaleOrders.SnapshotDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) -- AND factwholesaleorders.DueDate >= @CurrentFinYearStart
+    AND MatProduct.PatternMakerId = 17 -- DWPlanned
+    AND MatProduct.BusinessDivisionCode = 16
+    AND MatProduct.ComponentGroupCode = 'FG'
+    AND MatProduct.IsActive = 1
+    AND MatProduct.TunId IS NULL
+    AND MatProduct.ColourId != 1
 GROUP BY MatProduct.StyleColourCode
 ,CAST(CASE 
 WHEN MatCustomer.BillToCustomerCode = 'DWRB' OR MatCustomer.BillToCustomerCode = 'DWRBUSD' THEN 'RebelAU'
