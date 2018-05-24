@@ -13,7 +13,7 @@ SELECT DISTINCT
   CAST(dbo.FuncRemoveSpecialChars(MatProduct.StyleName) AS VARCHAR(255)) AS StyleDesc,
   CAST(dbo.FuncRemoveSpecialChars(MatProduct.StyleCode) + '.' + dbo.FuncRemoveSpecialChars(MatProduct.ColourCode) AS VARCHAR(50)) AS StyleColourID,
   CAST(dbo.FuncRemoveSpecialChars(MatProduct.StyleCode) + ' - ' + dbo.FuncRemoveSpecialChars(MatProduct.StyleName) + '.' + dbo.FuncRemoveSpecialChars(MatProduct.ColourName) AS VARCHAR(255)) AS StyleColourDesc,
-  CASE WHEN MatProduct.BusinessDivisionCode = 16 AND MatProduct.StyleSeasonCode = 'CTL' THEN 'Y' ELSE 'N' END AS PlanningFlag
+  CASE WHEN MatProduct.BusinessDivisionCode = 16 AND MatProduct.PatternMakerId = 17 /* DWPlanned */  THEN 'Y' ELSE 'N' END AS PlanningFlag
 FROM
 (
   SELECT DISTINCT
@@ -29,7 +29,7 @@ FROM
     DepartmentName,
     ComponentGroupCode,
     BusinessDivisionCode,
-    StyleSeasonCode
+    PatternMakerId
   FROM
     dbo.MatProduct
   WHERE
