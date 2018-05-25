@@ -14,7 +14,7 @@ SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId
     THEN 1 
     ELSE CostingExchangeRate.ExchangeRate 
   END AS DECIMAL(18
-  ,4))) AS OSOH_C 
+  ,4))) AS CSOH_C 
 FROM FactStock 
     INNER JOIN MatProduct 
     ON MatProduct.ProductId = FactStock.ProductId 
