@@ -5,6 +5,10 @@ SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId
   ,CAST(SUM(FactStock.OnHandQuantity) AS INT) AS OSOH_U
 --  ,COALESCE (NULLIF (WholesaleAudPrice.CurrentPrice, 0) , BackupWholesaleAudPrice.CurrentPrice) AS Price
   , SUM(CAST((FactStock.OnHandQuantity) * (dbo.FuncGetTaxExclusiveAmount(COALESCE (NULLIF (WholesaleAudPrice.CurrentPrice, 0) , BackupWholesaleAudPrice.CurrentPrice), COALESCE (NULLIF (WholesaleAudPriceScheme.TaxRate, 0) , BackupWholesaleAudPriceScheme.TaxRate))) AS DECIMAL(18,4))) AS OSOH_D
+  , SUM(CAST((FactStock.OnHandQuantity * FactProductCost.Cost) / CASE
+                                                             WHEN MatWarehouse.CostingCurrencyId = AustralianDollarsCurrency.Id THEN 1
+                                                             ELSE CostingExchangeRate.ExchangeRate
+                                                             END AS DECIMAL(18,4))) AS OSOH_C  
 FROM FactStock 
     INNER JOIN MatWarehouse 
     ON MatWarehouse.WarehouseId = FactStock.WarehouseId 
@@ -31,7 +35,22 @@ FROM FactStock
     ON BackupWholesaleAudPrice.ProductId = MatProduct.ProductId 
     AND BackupWholesaleAudPrice.SalesPriceSchemeId = BackupWholesaleAudPriceScheme.Id 
     AND BackupWholesaleAudPrice.PriceDate = ( SELECT MAX(PriceDate) AS Expr1 
-                                            FROM FactProductPrice) 
+                                            FROM FactProductPrice)
+
+--====================                                             
+INNER JOIN DimCurrency AS AustralianDollarsCurrency ON AustralianDollarsCurrency.Code = 'AUD'
+
+LEFT OUTER JOIN FactExchangeRate AS CostingExchangeRate ON CostingExchangeRate.FromCurrencyId = MatWarehouse.CostingCurrencyId
+AND CostingExchangeRate.ToCurrencyId = AustralianDollarsCurrency.Id
+AND CostingExchangeRate.RateDate = FactStock.StockDate
+
+LEFT OUTER JOIN FactProductCost ON FactProductCost.CostDate =
+  (SELECT MAX(CostDate) AS Expr1
+   FROM FactProductCost)
+AND FactProductCost.ProductId = FactStock.ProductId
+AND FactProductCost.CostingZoneId = MatWarehouse.CostingZoneId                                             
+--========================
+                                             
 WHERE (MatWarehouse.WarehouseType = 'W')
     AND MatProduct.PatternMakerId = 17 -- DWPlanned
     AND MatProduct.BusinessDivisionCode = 16
