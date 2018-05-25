@@ -2,7 +2,7 @@ SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId
   ,CAST('TOTAL' AS NVARCHAR(50)) AS LocationID 
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID 
-  ,SUM(FactReceipts.TotalQuantity) AS Receipt_U 
+  ,SUM(FactReceipts.TotalQuantity) AS Receipts_U 
   , SUM(CAST((FactReceipts.TotalQuantity) * (dbo.FuncGetTaxExclusiveAmount(COALESCE (NULLIF (WholesaleAudPrice.CurrentPrice, 0) 
   , BackupWholesaleAudPrice.CurrentPrice) 
   , COALESCE (NULLIF (WholesaleAudPriceScheme.TaxRate, 0) , BackupWholesaleAudPriceScheme.TaxRate))) AS DECIMAL(18 
