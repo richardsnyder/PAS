@@ -1,5 +1,5 @@
 SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId 
-  ,CAST('TOTAL' AS NVARCHAR(50)) AS LocationID 
+  ,CAST('WHOLESALE' AS NVARCHAR(50)) AS LocationID 
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID 
   ,CAST(SUM(FactStock.OnHandQuantity) AS INT) AS CSOH_U
