@@ -35,10 +35,35 @@ FROM
   WHERE
     IsActive = 1
     AND TunId IS NULL
-    AND BusinessDivisionCode IN ('18', '10', '26','16')
+    AND BusinessDivisionCode IN ('18', '10', '26')
     AND ComponentGroupCode = 'FG'
     AND IsActive = 1
     AND ColourId != 1
+UNION ALL
+  SELECT DISTINCT
+    StyleCode,
+    StyleName,
+    ColourCode,
+    ColourName,
+    CategoryCode,
+    CategoryName,
+    SubCategoryCode,
+    SubCategoryName,
+    DepartmentCode,
+    DepartmentName,
+    ComponentGroupCode,
+    BusinessDivisionCode,
+    PatternMakerId
+  FROM
+    dbo.MatProduct
+  WHERE
+    IsActive = 1
+    AND TunId IS NULL
+    AND BusinessDivisionCode IN ('16')
+    AND ComponentGroupCode = 'FG'
+    AND IsActive = 1
+    AND ColourId != 1
+	AND MatProduct.PatternMakerId = 17
 ) AS MatProduct
 LEFT OUTER JOIN
   dbo.DimPlanningTranslation AS BusinessDivisionTranslation ON
