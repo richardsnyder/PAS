@@ -19,7 +19,7 @@ FROM DataWarehouse.dbo.FactWholesaleOrders
     LEFT JOIN DataWarehouse.dbo.MatProduct 
     ON MatProduct.ProductId = FactWholesaleOrders.ProductId
 WHERE 1=1
-    AND FactWholesaleOrders.SnapshotDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) -- AND factwholesaleorders.DueDate >= @CurrentFinYearStart
+    AND FactWholesaleOrders.SnapshotDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE))
     AND MatProduct.PatternMakerId = 17 -- DWPlanned
     AND MatProduct.BusinessDivisionCode = 16
     AND MatProduct.ComponentGroupCode = 'FG'
@@ -34,4 +34,5 @@ WHEN MatCustomer.BillToCustomerCode <> 'DWRBZ' AND MatCustomer.TerritoryCode ='N
 WHEN MatCustomer.BillToCustomerCode <> 'DWRB' OR MatCustomer.BillToCustomerCode <> 'DWRBUSD' AND MatCustomer.TerritoryCode <> 'NZ' THEN 'IndependentAU'
 END AS NVARCHAR(50))
 ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50))
-,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) 
+,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50))
+Order by 3

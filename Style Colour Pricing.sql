@@ -1,7 +1,7 @@
 SELECT DISTINCT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId 
-  ,CAST('TOTAL' AS NVARCHAR(50)) AS LocationID 
+  ,CAST('WHOLESALE' AS NVARCHAR(50)) AS LocationID 
   ,CAST(FORMAT(DimDate.RetailYear,'0000') + FORMAT(DimDate.RetailWeek,'00')  AS NVARCHAR(50)) AS TimeID 
-  ,CAST('TOTAL' AS NVARCHAR(50)) AS SeasonID 
+  ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID 
   ,MAX(CAST(COALESCE(dbo.FuncGetTaxExclusiveAmount(COALESCE (NULLIF (WholesaleAudPrice.CurrentPrice, 0)
   ,BackupWholesaleAudPrice.CurrentPrice) ,COALESCE (NULLIF (WholesaleAudPriceScheme.TaxRate, 0) , BackupWholesaleAudPriceScheme.TaxRate)),0)AS DECIMAL(18 ,4))) AS Wholesale_Price 
   
@@ -73,6 +73,7 @@ WHERE 1=1
 --  AND DimDate.DayOfWeekId = 7 --sunday
 GROUP BY CAST(MatProduct.StyleColourCode AS NVARCHAR(50))
   ,CAST(FORMAT(DimDate.RetailYear,'0000') + FORMAT(DimDate.RetailWeek,'00')  AS NVARCHAR(50))
+  ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50))
 
 --  
   
@@ -82,4 +83,4 @@ GROUP BY CAST(MatProduct.StyleColourCode AS NVARCHAR(50))
 --
 --select top 100 * from DimSalesPriceScheme
 --
---select count(*) from matproduct where  MatProduct.PatternMakerId = 17 
+--select count(*) from matproduct where  MatProduct.PatternMakerId = 17
