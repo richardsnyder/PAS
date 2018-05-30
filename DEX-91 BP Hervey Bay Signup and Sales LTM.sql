@@ -6,7 +6,7 @@ SELECT RetailCustomers.[Person Id] PersonId
 --  , RetailCustomers.[Signup Date] SignupDate 
 --  , 0 Sales
 FROM datawarehouseuserview.dbo.[Retail Customers] RetailCustomers 
-WHERE RetailCustomers.[Signup Store Code] = 'BASHERVE"B' 
+WHERE RetailCustomers.[Signup Store Code] = 'BASHERVE' 
   AND RetailCustomers.[Signup Date] >= DATEADD(MONTH, -12, CAST(GETDATE() AS DATE)) 
   AND RetailCustomers.[Privacy Requested] = 'N' 
   AND RetailCustomers.[Email Address] IS NOT NULL 
