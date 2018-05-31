@@ -29,8 +29,8 @@ AND MatProduct.ComponentGroupCode = 'FG'
 AND MatProduct.IsActive = 1
 AND MatProduct.TunId IS NULL
 AND MatProduct.ColourId != 1
-AND DimDate.RetailWeekId >= CurrentDate.RetailWeekId -CAST(dbo.GetConfiguration('MapleLakeWeeksToActualise') AS INT)
-AND DimDate.RetailWeekId <= CurrentDate.RetailWeekId
+AND DimDate.RetailWeekId BETWEEN CurrentDate.RetailWeekId -CAST(dbo.GetConfiguration('MapleLakeWeeksToActualise') AS INT)  AND CurrentDate.RetailWeekId
+
 GROUP BY MatProduct.StyleColourCode
   ,CASE 
     WHEN MatCustomer.BillToCustomerCode = 'DWRB' OR MatCustomer.BillToCustomerCode = 'DWRBUSD' THEN 'RebelAU'
