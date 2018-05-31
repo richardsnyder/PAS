@@ -3,10 +3,12 @@ SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID 
   ,SUM(FactPurchaseOrders.PurchaseOrderQuantity) AS PURCHASES_U
+  
   , COALESCE(SUM(CAST((FactPurchaseOrders.PurchaseOrderQuantity) * (dbo.FuncGetTaxExclusiveAmount(COALESCE (NULLIF (WholesaleAudPrice.CurrentPrice, 0) 
   , BackupWholesaleAudPrice.CurrentPrice) 
   , COALESCE (NULLIF (WholesaleAudPriceScheme.TaxRate, 0) , BackupWholesaleAudPriceScheme.TaxRate))) AS DECIMAL(18 
-  ,4))),0) AS PURCHASES_D 
+  ,4))),0) AS PURCHASES_D
+   
   , COALESCE(SUM(CAST((FactPurchaseOrders.PurchaseOrderQuantity * FactProductCost.Cost) / 
   CASE 
     WHEN MatWarehouse.CostingCurrencyId = AustralianDollarsCurrency.Id 
@@ -14,24 +16,29 @@ SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId
     ELSE CostingExchangeRate.ExchangeRate 
   END AS DECIMAL(18 
   ,4))),0) AS PURCHASES_C 
+  
 FROM dbo.FactPurchaseOrders 
     INNER JOIN MatWarehouse 
     ON FactPurchaseOrders.WarehouseId = MatWarehouse.WarehouseId 
     INNER JOIN dbo.DimDate 
     ON DimDate.CalendarDate = FactPurchaseOrders.DueDate 
     INNER JOIN dbo.DimDate CurrentDate 
-    ON CurrentDate.CalendarDate = CAST(GETDATE() AS DATE) 
+    ON CurrentDate.CalendarDate = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE) 
     INNER JOIN dbo.MatProduct 
     ON MatProduct.ProductId = FactPurchaseOrders.ProductId 
+    
     LEFT OUTER JOIN DimSalesPriceScheme AS WholesaleAudPriceScheme 
     ON WholesaleAudPriceScheme.Code = 'WholesaleAUD' 
+    
     LEFT OUTER JOIN DimSalesPriceScheme AS BackupWholesaleAudPriceScheme 
     ON WholesaleAudPriceScheme.Id = WholesaleAudPriceScheme.BackupSalesPriceSchemeId 
+    
     LEFT OUTER JOIN FactProductPrice AS WholesaleAudPrice 
     ON WholesaleAudPrice.ProductId = MatProduct.ProductId 
     AND WholesaleAudPrice.SalesPriceSchemeId = WholesaleAudPriceScheme.Id 
     AND WholesaleAudPrice.PriceDate = ( SELECT MAX(PriceDate) AS Expr1 
                                         FROM FactProductPrice) 
+                                        
     LEFT OUTER JOIN FactProductPrice AS BackupWholesaleAudPrice 
     ON BackupWholesaleAudPrice.ProductId = MatProduct.ProductId 
     AND BackupWholesaleAudPrice.SalesPriceSchemeId = BackupWholesaleAudPriceScheme.Id 
