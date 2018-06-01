@@ -1,0 +1,5 @@
+SELECT [GNA_ORG_CODE]  AS Code
+      ,[GNA_ACCOUNT] + ' - ' + [GNA_ORG_NAME] AS Name
+  FROM [Chris21_DWH].[dbo].[Staging_ORGNA]
+  WHERE GNA_SEC_LVL = 1
+  AND NULLIF(GNA_EXP_DATE,'0001-01-02') IS NULL
