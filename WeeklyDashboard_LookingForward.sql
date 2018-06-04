@@ -8,11 +8,11 @@ DROP TABLE #ReportDatesNextWeek
 IF OBJECT_ID('tempdb..#RetailSalesAndStock') IS NOT NULL
 DROP TABLE #RetailSalesAndStock
 
-GO                                      --Uncomment when running in SSMS
-DECLARE @ReportDate INT                 --Uncomment when running in SSMS
-DECLARE @BusinessDivision INT           --Uncomment when running in SSMS
-SET @ReportDate = 411 -- WK51           --Uncomment when running in SSMS
-SET @BusinessDivision = 3 -- BA         --Uncomment when running in SSMS
+--GO                                      --Uncomment when running in SSMS
+--DECLARE @ReportDate INT                 --Uncomment when running in SSMS
+--DECLARE @BusinessDivision INT           --Uncomment when running in SSMS
+--SET @ReportDate = 411 -- WK51           --Uncomment when running in SSMS
+--SET @BusinessDivision = 3 -- BA         --Uncomment when running in SSMS
 
 DECLARE @ReportDatePlusOne INT  
 
