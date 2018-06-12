@@ -1,3 +1,7 @@
+/* ########################################################
+   Add Area Managers against each profit centre
+   ########################################################*/
+
 SELECT mw.BusinessDivisionId
       ,mw.BusinessDivisionCode
       ,mw.BusinessDivisionName

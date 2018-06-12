@@ -162,49 +162,67 @@ SELECT
 	* INTO #Dates
 FROM dbo.GetFinancialReportingDatesInclLTM(@FinancialMonthEnd)
 
+--===============================================================================
 --Generate a base table of rows
+--by division location position
 SELECT DISTINCT
-	Division
-   ,CASE Position
-		WHEN 'RSTR' THEN 'Retail'
-		ELSE 'SupportOffice'
+	A.Division
+  ,A.Location
+  ,A.Position AS Chris21_Position
+  ,A.PositionTitle
+  ,CASE A.Position
+	  WHEN 'RSTR' THEN 'Retail'
+  	ELSE 'SupportOffice'
 	END AS Position
-   ,CASE
-		WHEN TerminationTypes.TerminationType IN ('VR', 'NS', 'A', 'NW', 'E') THEN 'Voluntary'
+  ,CASE
+	  WHEN TerminationTypes.TerminationType IN ('VR', 'NS', 'A', 'NW', 'E') THEN 'Voluntary'
 		WHEN TerminationTypes.TerminationType IN ('TR', 'CE', 'D', 'I') THEN 'Other'
 		WHEN TerminationTypes.TerminationType NOT IN ('VR', 'NS', 'A', 'NW', 'E', 'TR', 'CE', 'D', 'I') THEN 'InVoluntary'
-	END AS TerminationType INTO #BaseResultset
+	END AS TerminationType 
+  INTO #BaseResultset
 FROM (SELECT DISTINCT
-		POS_L1_CD AS Division
-	   ,POS_L4_CD AS Position
-     ,POS_L5_CD AS Location
-	FROM Staging_EMPOS) AS A
+		Staging_EMPOS.POS_L1_CD AS Division
+	   ,Staging_EMPOS.POS_L4_CD AS Position
+     ,Staging_EMPOS.POS_TITLE AS PositionTitle
+     ,Staging_EMPOS.POS_L5_CD AS Location
+	FROM dbo.Staging_EMPOS) AS A
 CROSS JOIN (SELECT DISTINCT
-		TER_REAS_CD AS TerminationType
-	FROM Staging_EMTER) TerminationTypes
-WHERE Division IN (@BusinessDivision)
+		Staging_EMTER.TER_REAS_CD AS TerminationType
+	FROM dbo.Staging_EMTER) TerminationTypes
+WHERE A.Division IN (@BusinessDivision)
 
 UNION ALL
 
+-- Get the total level termination
 SELECT DISTINCT
-	Division
-   ,CASE Position
+	A.Division
+  ,A.Location
+  ,A.Position AS Chris21_Position
+  ,A.PositionTitle
+   ,CASE A.Position
 		WHEN 'RSTR' THEN 'Retail'
 		ELSE 'SupportOffice'
 	END AS Position
    ,'Total' AS TerminationType --INTO #BaseResultset
 FROM (SELECT DISTINCT
-		POS_L1_CD AS Division
-	   ,POS_L4_CD AS Position
-	FROM Staging_EMPOS) AS A
-WHERE Division IN (@BusinessDivision)
+		Staging_EMPOS.POS_L1_CD AS Division
+    ,Staging_EMPOS.POS_L4_CD AS Position
+    ,Staging_EMPOS.POS_TITLE AS PositionTitle
+    ,Staging_EMPOS.POS_L5_CD AS Location
+	FROM dbo.Staging_EMPOS) AS A
+WHERE A.Division IN (@BusinessDivision)
 
-SELECT
+--======================================================================================
+
+-- Now join the actual numbers to the BaseResultSet
+SELECT DISTINCT
 	@ReportingPeriod 'ReportingPeriod'
    ,@ReportingPeriodId 'ReportingPeriodId'
    ,Termination.Division
    ,HeadCountMTD.DivisionName
+   ,Termination.Location
    ,Termination.Position
+   ,Termination.PositionTitle
    ,Termination.TerminationType
    ,Termination.MTD
    ,CASE
@@ -239,7 +257,10 @@ SELECT
    ,@LtmStart 'LTM StartDate'
    ,@LtmEnd 'LTM EndDate'
 FROM (SELECT
-		#BaseResultset.Division
+		 #BaseResultset.Division
+     ,#BaseResultSet.Location
+     ,#BaseResultSet.Chris21_Position
+     ,#BaseResultSet.PositionTitle
 	   ,#BaseResultset.Position
 	   ,#BaseResultset.TerminationType
 	   ,COALESCE(Results.MTD, 0) AS MTD
@@ -247,8 +268,13 @@ FROM (SELECT
 	   ,COALESCE(Results.LYTD, 0) AS LYTD
 	   ,COALESCE(Results.LTM, 0) AS LTM
 	FROM #BaseResultset
+
+/* Terminations MTD/YTD/LYTD/LTM */  
 	LEFT OUTER JOIN (SELECT DISTINCT
-			Staging_EMPOS.POS_L1_CD AS Division
+      Staging_EMPOS.POS_L1_CD AS Division
+      ,Staging_EMPOS.POS_L4_CD AS Chris21_Position
+      ,Staging_EMPOS.POS_TITLE AS PositionTitle
+      ,Staging_EMPOS.POS_L5_CD AS Location
 		   ,CASE
 				WHEN Staging_EMPOS.POS_L4_CD <> 'RSTR' THEN 'SupportOffice'
 				WHEN Staging_EMPOS.POS_L4_CD = 'RSTR' THEN 'Retail'
@@ -288,6 +314,9 @@ FROM (SELECT
 		AND Staging_EMDET.DET_NUMBER NOT LIKE 'H%'
 		AND Staging_EMPOS.POS_L1_CD IN (@BusinessDivision)
 		GROUP BY Staging_EMPOS.POS_L1_CD
+             ,Staging_EMPOS.POS_L4_CD
+             ,Staging_EMPOS.POS_TITLE
+             ,Staging_EMPOS.POS_L5_CD
 				,CASE
 					 WHEN Staging_EMPOS.POS_L4_CD <> 'RSTR' THEN 'SupportOffice'
 					 WHEN Staging_EMPOS.POS_L4_CD = 'RSTR' THEN 'Retail'
@@ -300,10 +329,15 @@ FROM (SELECT
 		ON Results.Division = #BaseResultset.Division
 		AND Results.Position = #BaseResultset.Position
 		AND Results.TerminationType = #BaseResultset.TerminationType) Termination
+
+--============================================================================================================================
+/* Headcount MTD/YTD/LYTD/LTM */
 LEFT JOIN (SELECT
 		'HeadCount' AS Measure
 	   ,HeadCount.Division
 	   ,HeadCount.DivisionName AS 'DivisionName'
+     
+     /* Headcount Support Office MTD */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @FinancialMonthEnd AND
@@ -311,6 +345,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @FinancialMonthStart) THEN HeadCount.employee
 		END) AS 'HeadCountSupportOffice'
 
+    /* Headcount Retail MTD */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position = 'RSTR' AND
 				HeadCount.JoinedDate <= @FinancialMonthEnd AND
@@ -318,6 +353,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @FinancialMonthStart) THEN HeadCount.employee
 		END) AS 'HeadCountRetail'
 
+    /* Headcount Total MTD */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @FinancialMonthEnd AND
@@ -332,6 +368,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @FinancialMonthStart) THEN HeadCount.employee
 		END) AS 'HeadCountMtdTotal'
 
+    /* Headcount YTD (Including report month) Support Office */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @FinancialMonthEnd AND
@@ -339,6 +376,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @FinancialYearStart) THEN HeadCount.employee
 		END) AS 'HeadCountYTDSupportOffice'
 
+    /* Headcount YTD (Including report month) Retail */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position = 'RSTR' AND
 				HeadCount.JoinedDate <= @FinancialMonthEnd AND
@@ -346,6 +384,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @FinancialYearStart) THEN HeadCount.employee
 		END) AS 'HeadCountYTDRetail'
 
+    /* Headcount YTD (Including report month) Total */    
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @FinancialMonthEnd AND
@@ -360,6 +399,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @FinancialYearStart) THEN HeadCount.employee
 		END) AS 'HeadCountYtdTotal'
 
+    /* Headcount Last Year to Date (Including report month) - Support Office */    
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @LastFinancialYearMonthEnd AND
@@ -367,14 +407,16 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @LastFinancialYearStart) THEN HeadCount.employee
 		END) AS 'HeadCountLastYtdSupportOffice'
 
-	   ,COUNT(DISTINCT CASE
+    /* Headcount Last Year to Date (Including report month) - Retail */    	
+    ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position = 'RSTR' AND
 				HeadCount.JoinedDate <= @LastFinancialYearMonthEnd AND
 				(HeadCount.TerminationDate = '0001-01-02' OR
 				HeadCount.TerminationDate >= @LastFinancialYearStart) THEN HeadCount.employee
 		END) AS 'HeadCountLastYtdRetail'
 
-	   ,COUNT(DISTINCT CASE
+    /* Headcount Last Year to Date (Including report month) - Total */    	    
+    ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @LastFinancialYearMonthEnd AND
 				(HeadCount.TerminationDate = '0001-01-02' OR
@@ -388,6 +430,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @LastFinancialYearStart) THEN HeadCount.employee
 		END) AS 'HeadCountLastYtdTotal'
 
+    /* Headcount LTM Support Office */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @LtmStart AND
@@ -395,6 +438,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @LtmStart) THEN HeadCount.employee
 		END) AS 'HeadCountLtmSupportOffice'
 
+    /* Headcount LTM Retail */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position = 'RSTR' AND
 				HeadCount.JoinedDate <= @LtmStart AND
@@ -402,6 +446,7 @@ LEFT JOIN (SELECT
 				HeadCount.TerminationDate >= @LtmStart) THEN HeadCount.employee
 		END) AS 'HeadCountLtmRetail'
 
+    /* Headcount LTM Total */
 	   ,COUNT(DISTINCT CASE
 			WHEN HeadCount.Position <> 'RSTR' AND
 				HeadCount.JoinedDate <= @LtmStart AND
@@ -415,32 +460,35 @@ LEFT JOIN (SELECT
 				(HeadCount.TerminationDate = '0001-01-02' OR
 				HeadCount.TerminationDate >= @LtmStart) THEN HeadCount.employee
 		END) AS 'HeadCountLtmTotal'
-
+    
+/* Headcount Driver Query */
 	FROM (SELECT DISTINCT
 			Staging_EMDET.DET_NUMBER AS 'Employee'
-		   ,Staging_ORGNA.GNA_ORG_CODE AS Division
-		   ,Staging_ORGNA.GNA_ORG_NAME AS DivisionName
-		   ,Staging_EMPOS.POS_L4_CD AS 'Position'
-		   ,Staging_EMDET.DET_DATE_JND AS 'JoinedDate'
-		   ,Staging_EMDET.DET_TER_DATE AS 'TerminationDate'
+       ,Staging_ORGNA.GNA_ORG_CODE AS Division
+       ,Staging_ORGNA.GNA_ORG_NAME AS DivisionName
+       ,Staging_EMPOS.POS_L4_CD AS 'Position'
+       ,Staging_EMPOS.POS_TITLE AS PositionTitle
+       ,Staging_EMPOS.POS_L5_CD AS Location
+       ,Staging_EMDET.DET_DATE_JND AS 'JoinedDate'
+       ,Staging_EMDET.DET_TER_DATE AS 'TerminationDate'
 		--   ,Staging_EMPOS.POS_END AS 'PositionEnd'
 		FROM Chris21_DWH.dbo.Staging_EMDET
 		INNER JOIN Chris21_DWH.dbo.Staging_EMPOS
 			ON Staging_EMPOS.DET_NUMBER = Staging_EMDET.DET_NUMBER
-		INNER JOIN Staging_ORGNA
+		INNER JOIN dbo.Staging_ORGNA
 			ON Staging_ORGNA.GNA_ORG_CODE = Staging_EMPOS.POS_L1_CD
 		WHERE 1 = 1
 		AND Staging_EMPOS.DET_NUMBER IN (SELECT DISTINCT
 				Staging_EMDET.DET_NUMBER
-			FROM Staging_EMDET
+			FROM dbo.Staging_EMDET
 			WHERE (Staging_EMDET.DET_TER_DATE = '0001-01-02'
 			OR Staging_EMDET.DET_TER_DATE >= @LtmStart))
 		AND Staging_ORGNA.GNA_ORG_CODE IN (@BusinessDivision)
 		AND Staging_EMDET.DET_NUMBER NOT LIKE 'H%') HeadCount
 	GROUP BY HeadCount.Division
-			,HeadCount.DivisionName) AS HeadCountMTD
+			,HeadCount.DivisionName
+      ,HeadCount.Position
+      ,HeadCount.PositionTitle
+      ,HeadCount.Location) AS HeadCountMTD
 	ON HeadCountMTD.Division = Termination.Division
 ORDER BY 1, 2
-
-
--- SELECT * from #Dates where periodtype = 'Year' and currentorpreviousperiod = 'previous'
