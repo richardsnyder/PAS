@@ -23,7 +23,7 @@ AS (
      THEN FactRetailSales.SalesExcludingTaxLocal
     END) AS DiscountExcludingTaxLocal
   ,SUM(CASE 
-    WHEN RetailLineTypeId = 3
+    WHEN RetailLineTypeId = 3 OR (RetailLineTypeId = 2 AND RetailDiscountReasonId = 330)
      THEN FactRetailSales.SalesExcludingTaxLocal
     END) AS LoyaltyDiscountExcludingTaxLocal
   ,SUM(CASE 
@@ -39,7 +39,7 @@ AS (
      THEN FactRetailSales.SalesExcludingTaxForeign
     END) AS DiscountExcludingTaxForeign
   ,SUM(CASE 
-    WHEN RetailLineTypeId = 3
+    WHEN RetailLineTypeId = 3 OR (RetailLineTypeId = 2 AND RetailDiscountReasonId = 330)
      THEN FactRetailSales.SalesExcludingTaxForeign
     END) AS LoyaltyDiscountExcludingTaxForeign
   ,SUM(CASE 
@@ -48,8 +48,8 @@ AS (
     END) AS PriceOverrideExcludingTaxForeign
  FROM JetsDataWarehouse.dbo.FactRetailSales
  WHERE 1=1
-   AND FactRetailSales.SaleDate BETWEEN '29-Jul-2015' AND '07-May-2018'
- --AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
+ AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
+--  AND FactRetailSales.SaleDate BETWEEN '29-Jul-2015' AND '12-Jun-2018'
  GROUP BY FactRetailSales.HeaderSourceKey
   ,FactRetailSales.TransactionNumber
   ,FactRetailSales.SaleDate
@@ -70,6 +70,9 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
  ,DimAddress.[State] AS [state]
  ,DimAddress.Postcode AS [postcode]
  ,DimAddress.Country AS [country]
+ ,NULL AS [LoyaltyRewardEmailsOptIn]
+ ,NULL AS [LoyaltySmsRemindersOptIn]
+ ,NULL AS [LoyaltyAppNotificationsOptIn]
  ,RetailSales.HeaderSourceKey AS order_id -- HeaderSourceKey is meaningless to users Not all Jets transactions have transaction number
  ,'' AS [business]
  ,'' [label]
@@ -87,6 +90,11 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
  ,MatProduct.StyleName AS [item_name]
  ,MatProduct.StyleColourSizeCode AS [sku]
  ,RetailSales.CurrentUnitPriceExcludingTaxForeign AS [Current_Unit_Price_Excluding_Tax]
+ ,RetailSales.Quantity AS Quantity
+ ,RetailSales.SalesExcludingTaxForeign AS [SalesExcludingTaxForeign]
+ ,RetailSales.DiscountExcludingTaxForeign AS [DiscountExcludingTaxForeign]
+ ,RetailSales.LoyaltyDiscountExcludingTaxForeign AS [LoyaltyDiscountExcludingTaxForeign]
+ ,RetailSales.PriceOverrideExcludingTaxForeign AS [PriceOverrideExcludingTaxForeign]
  ,'Jets' AS [category_1]
  ,'Jets' AS [category_1A]
  ,MatProduct.CategoryCode [category_2]
@@ -96,6 +104,7 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
  ,MatProduct.StoryCode [category_4]
  ,MatProduct.StoryName [category_4A]
  ,MatProduct.SizeCode AS [size]
+ ,NULL AS [ColourTypeName]
  ,MatProduct.ColourName AS [colour]
  ,CASE 
   WHEN MapProfitCentre.ProfitCentreType = 'EC'
@@ -122,6 +131,7 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
  ,NULL AS [nps_date]
  ,NULL AS [loyalty_reward_balance]
  ,NULL AS [loyalty_reward_expiry]
+ ,NULL AS [Has_App]
 FROM RetailSales
 LEFT OUTER JOIN JetsDataWarehouse.dbo.DimPerson ON DimPerson.Id = RetailSales.RetailCustomerId
 LEFT OUTER JOIN JetsDataWarehouse.dbo.DimAddress ON DimPerson.AddressId = DimAddress.Id

@@ -23,7 +23,7 @@ AS (
           THEN FactRetailSales.SalesExcludingTaxLocal
         END) AS DiscountExcludingTaxLocal
     ,SUM(CASE 
-        WHEN RetailLineTypeId = 3
+        WHEN RetailLineTypeId = 3 OR (RetailLineTypeId = 2 AND RetailDiscountReasonId = 330)
           THEN FactRetailSales.SalesExcludingTaxLocal
         END) AS LoyaltyDiscountExcludingTaxLocal
     ,SUM(CASE 
@@ -39,7 +39,7 @@ AS (
           THEN FactRetailSales.SalesExcludingTaxForeign
         END) AS DiscountExcludingTaxForeign
     ,SUM(CASE 
-        WHEN RetailLineTypeId = 3
+        WHEN RetailLineTypeId = 3 OR (RetailLineTypeId = 2 AND RetailDiscountReasonId = 330)
           THEN FactRetailSales.SalesExcludingTaxForeign
         END) AS LoyaltyDiscountExcludingTaxForeign
     ,SUM(CASE 
@@ -49,8 +49,8 @@ AS (
     ,FactRetailSales.WarehouseDispatchTypeId
   FROM FactRetailSales
   WHERE 1 = 1
---AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
-  AND FactRetailSales.SaleDate BETWEEN '29-Jul-2015' AND '07-May-2018'
+AND FactRetailSales.SaleDate = DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) --Yesterday
+--  AND FactRetailSales.SaleDate BETWEEN '29-Jul-2015' AND '12-Jun-2018'
   GROUP BY FactRetailSales.HeaderSourceKey
     ,FactRetailSales.TransactionNumber
     ,FactRetailSales.SaleDate
@@ -72,6 +72,9 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
   ,RetailCustomers.[Address State] AS [state]
   ,RetailCustomers.[Address Postcode] AS [postcode]
   ,RetailCustomers.[Address Country] AS [country]
+  ,RetailCustomers.[Loyalty Reward Emails Opt-In] AS [LoyaltyRewardEmailsOptIn]
+  ,RetailCustomers.[Loyalty SMS Reminders Opt-In] AS [LoyaltySmsRemindersOptIn]
+  ,RetailCustomers.[Loyalty App Notifications Opt-In] AS [LoyaltyAppNotificationsOptIn]
   ,RetailSales.HeaderSourceKey AS order_id --or transaction number, HeaderSourceKey is meaningless to users.
   ,'' AS [business]
   ,'' AS [label]
@@ -89,6 +92,11 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
   ,MatProduct.StyleName AS [item_name]
   ,MatProduct.StyleColourSizeCode AS [sku]
   ,RetailSales.CurrentUnitPriceExcludingTaxForeign AS [Current_Unit_Price_Excluding_Tax]
+  ,RetailSales.Quantity AS Quantity
+  ,RetailSales.SalesExcludingTaxForeign AS [SalesExcludingTaxForeign]
+  ,RetailSales.DiscountExcludingTaxForeign AS [DiscountExcludingTaxForeign]
+  ,RetailSales.LoyaltyDiscountExcludingTaxForeign AS [LoyaltyDiscountExcludingTaxForeign]
+  ,RetailSales.PriceOverrideExcludingTaxForeign AS [PriceOverrideExcludingTaxForeign]
   ,MatProduct.BusinessDivisionName AS [category_1]
   ,MatProduct.BusinessDivisionName AS [category_1A]
   ,CASE 
@@ -102,6 +110,7 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
   ,MatProduct.SubCategoryCode AS [category_4]
   ,Matproduct.SubCategoryName AS [category_4A]
   ,MatProduct.SizeCode AS [size]
+  ,MatProduct.ColourTypeName AS [ColourTypeName]
   ,MatProduct.ColourName AS [colour]
   ,CASE 
     WHEN DimProfitCentre.ProfitCentreType = 'EC'
@@ -129,6 +138,7 @@ SELECT RetailSales.RetailCustomerId AS [customer_id]
   ,NULL AS [nps_date]
   ,LoyaltyPerson.amount_remaining AS [loyalty_reward_balance]
   ,LoyaltyPerson.expiry_date AS [loyalty_reward_expiry]
+  ,NULL AS [Has_App]
 FROM RetailSales
 LEFT OUTER JOIN DataWarehouseUserView.dbo.[Retail Customers] RetailCustomers ON RetailCustomers.[Person Id] = RetailSales.RetailCustomerId
 LEFT OUTER JOIN (
