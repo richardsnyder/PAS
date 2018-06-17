@@ -52,10 +52,10 @@ SELECT 'TOTAL' AS TotalID
   , 'Designworks Level 3' AS Level3Desc 
   , 'DesignworksLevel4' AS Level4ID 
   , 'Designworks Level 4' AS Level4Desc 
-  , 'DesignworksLevel5' AS Level5ID 
-  , 'Designworks Level 5' AS Level5Desc 
-  , 'Wholesale' AS Level6ID 
-  , 'Wholesale' AS Level6Desc 
+  , 'Wholesale' AS Level5ID 
+  , 'Wholesale' AS Level5Desc 
+  , 'AU' AS Level6ID 
+  , 'Australia' AS Level6Desc 
   , 'RebelAU' AS locationID
   , 'Rebel AU' AS LocationDesc 
   , NULL AS SQM
@@ -71,10 +71,10 @@ SELECT 'TOTAL' AS TotalID
   , 'Designworks Level 3' AS Level3Desc 
   , 'DesignworksLevel4' AS Level4ID 
   , 'Designworks Level 4' AS Level4Desc 
-  , 'DesignworksLevel5' AS Level5ID 
-  , 'Designworks Level 5' AS Level5Desc 
-  , 'Wholesale' AS Level6ID 
-  , 'Wholesale' AS Level6Desc 
+  , 'Wholesale' AS Level5ID 
+  , 'Wholesale' AS Level5Desc 
+  , 'NZ' AS Level6ID 
+  , 'New Zealand' AS Level6Desc 
   , 'RebelNZ' AS locationID
   , 'Rebel NZ' AS LocationDesc 
   , NULL AS SQM
@@ -90,10 +90,10 @@ SELECT 'TOTAL' AS TotalID
   , 'Designworks Level 3' AS Level3Desc 
   , 'DesignworksLevel4' AS Level4ID 
   , 'Designworks Level 4' AS Level4Desc 
-  , 'DesignworksLevel5' AS Level5ID 
-  , 'Designworks Level 5' AS Level5Desc 
-  , 'Wholesale' AS Level6ID 
-  , 'Wholesale' AS Level6Desc 
+  , 'Wholesale' AS Level5ID 
+  , 'Wholesale' AS Level5Desc 
+  , 'AU' AS Level6ID 
+  , 'Australia' AS Level6Desc 
   , 'IndependentAU' AS locationID
   , 'Independent AU' AS LocationDesc 
   , NULL AS SQM
@@ -109,12 +109,13 @@ SELECT 'TOTAL' AS TotalID
   , 'Designworks Level 3' AS Level3Desc 
   , 'DesignworksLevel4' AS Level4ID 
   , 'Designworks Level 4' AS Level4Desc 
-  , 'DesignworksLevel5' AS Level5ID 
-  , 'Designworks Level 5' AS Level5Desc 
-  , 'Wholesale' AS Level6ID 
-  , 'Wholesale' AS Level6Desc 
+  , 'Wholesale' AS Level5ID 
+  , 'Wholesale' AS Level5Desc 
+  , 'NZ' AS Level6ID 
+  , 'New Zealand' AS Level6Desc 
   , 'IndependentNZ' AS locationID
   , 'Independent NZ' AS LocationDesc
+
   , NULL AS SQM
   , NULL AS DimAtt1 --Territory
   , NULL AS DimAtt2 --Region
@@ -128,10 +129,10 @@ SELECT 'TOTAL' AS TotalID
   , 'Designworks Level 3' AS Level3Desc 
   , 'DesignworksLevel4' AS Level4ID 
   , 'Designworks Level 4' AS Level4Desc 
-  , 'DesignworksLevel5' AS Level5ID  
-  , 'Designworks Level 5' AS Level5Desc 
-  , 'Wholesale' AS Level6ID 
-  , 'Wholesale' AS Level6Desc 
+  , 'Wholesale' AS Level5ID  
+  , 'Wholesale' AS Level5Desc 
+  , 'AU' AS Level6ID 
+  , 'Australia' AS Level6Desc 
   , 'OnlineAU' AS locationID
   , 'Online AU' AS LocationDesc   
   , NULL AS SQM
@@ -147,13 +148,13 @@ SELECT 'TOTAL' AS TotalID
   , 'Designworks Level 3' AS Level3Desc 
   , 'DesignworksLevel4' AS Level4ID 
   , 'Designworks Level 4' AS Level4Desc 
-  , 'DesignworksLevel5' AS Level5ID 
-  , 'Designworks Level 5' AS Level5Desc 
-  , 'Wholesale' AS Level6ID 
-  , 'Wholesale' AS Level6Desc 
+  , 'Wholesale' AS Level5ID 
+  , 'Wholesale' AS Level5Desc 
+  , 'NZ' AS Level6ID 
+  , 'New Zealand' AS Level6Desc 
   , 'OnlineNZ' AS locationID
   , 'Online NZ' AS LocationDesc  
   , NULL AS SQM
   , NULL AS DimAtt1 --Territory
   , NULL AS DimAtt2 --Region
-  , NULL AS DimAtt3 --Climate  
+  , NULL AS DimAtt3 --Climate
