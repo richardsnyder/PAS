@@ -2,8 +2,8 @@ SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourID
   ,CAST('ONLINE' AS NVARCHAR(50)) AS LocationID
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID
-  ,CAST(SUM(FactRetailSales.SalesExcludingTaxForeign) AS NUMERIC(16 ,2)) AS Sales_D
-  ,CAST(SUM(FactRetailSales.CostExtendedExcludingTaxForeign) AS NUMERIC(16 ,2)) AS COGS_D
+  ,CAST(0 AS NUMERIC(16 ,2)) AS Sales_D
+  ,CAST(0 AS NUMERIC(16 ,2)) AS COGS_D
   ,CAST(SUM(CASE WHEN FactRetailSales.RetailLineTypeId = 1 THEN FactRetailSales.Quantity ELSE 0 END) AS NUMERIC(16 ,2)) AS Sales_U     
 FROM dbo.FactRetailSales 
     INNER JOIN dbo.MatProduct 
