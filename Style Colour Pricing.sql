@@ -1,4 +1,5 @@
-SELECT DISTINCT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId 
+SELECT DISTINCT
+  CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId 
   ,CAST('WHOLESALE' AS NVARCHAR(50)) AS LocationID 
   ,CAST(FORMAT(DimDate.RetailYear,'0000') + FORMAT(DimDate.RetailWeek,'00')  AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID 
@@ -20,6 +21,9 @@ FROM dbo.MatProduct
     CROSS JOIN dbo.MatWarehouse 
     CROSS JOIN dbo.DimDate 
 
+    Inner Join dbo.DimDate CurrentDate
+    on CurrentDate.CalendarDate = CAST(GETDATE() AS DATE)
+
     LEFT OUTER JOIN DimSalesPriceScheme AS WholesaleAudPriceScheme 
     ON WholesaleAudPriceScheme.Code = 'WholesaleAUD' 
 
@@ -35,16 +39,18 @@ FROM dbo.MatProduct
     ON BackupWholesaleAudPrice.ProductId = MatProduct.ProductId 
     AND BackupWholesaleAudPrice.SalesPriceSchemeId = BackupWholesaleAudPriceScheme.Id 
     AND BackupWholesaleAudPrice.PriceDate = DimDate.CalendarDate
-                                              
 
     LEFT OUTER JOIN DimSalesPriceScheme AS RRPAudPriceScheme 
     ON RRPAudPriceScheme.Code = 'RRP AUD' 
+
     LEFT OUTER JOIN DimSalesPriceScheme AS BackupRRPAudPriceScheme
     ON RRPAudPriceScheme.Id = RRPAudPriceScheme.BackupSalesPriceSchemeId 
+
     LEFT OUTER JOIN FactProductPrice AS RRPAudPrice 
     ON RRPAudPrice.ProductId = MatProduct.ProductId 
     AND RRPAudPrice.SalesPriceSchemeId = RRPAudPriceScheme.Id 
     AND RRPAudPrice.PriceDate = DimDate.CalendarDate
+
     LEFT OUTER JOIN FactProductPrice AS BackupRRPAudPrice
     ON BackupRRPAudPrice.ProductId = MatProduct.ProductId 
     AND BackupRRPAudPrice.SalesPriceSchemeId = BackupRRPAudPriceScheme.Id 
@@ -52,10 +58,12 @@ FROM dbo.MatProduct
  
     INNER JOIN DimCurrency AS AustralianDollarsCurrency 
     ON AustralianDollarsCurrency.Code = 'AUD' 
+
     LEFT OUTER JOIN FactExchangeRate AS CostingExchangeRate 
     ON CostingExchangeRate.FromCurrencyId = MatWarehouse.CostingCurrencyId 
     AND CostingExchangeRate.ToCurrencyId = AustralianDollarsCurrency.Id 
     AND CostingExchangeRate.RateDate = DimDate.CalendarDate 
+
     LEFT OUTER JOIN FactProductCost 
     ON FactProductCost.CostDate = DimDate.CalendarDate
     AND FactProductCost.ProductId = MatProduct.ProductId 
@@ -66,21 +74,16 @@ WHERE 1=1
  AND MatWarehouse.WarehouseCode = 'DWMAIN' 
   AND MatProduct.PatternMakerId = 17 -- DWPlanned
   AND MatProduct.TunId IS NULL
-  AND ComponentGroupCode = 'FG'
+  AND MatProduct.ComponentGroupCode = 'FG'
   AND MatProduct.IsActive = 1
   AND MatProduct.ColourId != 1
-  AND DimDate.CalendarDate = (select max(PriceDate) from FactProductPrice)
---  AND DimDate.DayOfWeekId = 7 --sunday
+  AND DimDate.DayOfWeekId = 7 -- Sunday
+  --AND DimDate.CalendarDate = (select max(PriceDate) from FactProductPrice WHERE datepart(dw,PriceDate) = 1)
+--  AND DimDate.RetailYear Between 2016 and 2018
+
+  AND DimDate.RetailWeekId >= CurrentDate.RetailWeekId -CAST(dbo.GetConfiguration('MapleLakeWeeksToActualise') AS INT)
+  AND DimDate.RetailWeekId < CurrentDate.RetailWeekId
+
 GROUP BY CAST(MatProduct.StyleColourCode AS NVARCHAR(50))
   ,CAST(FORMAT(DimDate.RetailYear,'0000') + FORMAT(DimDate.RetailWeek,'00')  AS NVARCHAR(50))
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50))
-
---  
-  
----select * from matproduct where StyleColourCode = 'DWEQ141058.DWGRY'
---
---select  * from factProductPrice2018 where productid in (679949)
---
---select top 100 * from DimSalesPriceScheme
---
---select count(*) from matproduct where  MatProduct.PatternMakerId = 17
