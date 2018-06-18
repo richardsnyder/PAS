@@ -158,3 +158,41 @@ SELECT 'TOTAL' AS TotalID
   , NULL AS DimAtt1 --Territory
   , NULL AS DimAtt2 --Region
   , NULL AS DimAtt3 --Climate
+  UNION ALL  
+SELECT 'TOTAL' AS TotalID 
+  , 'Total' AS TotalDesc
+  , 'DW' AS Level2ID 
+  , 'Designworks' AS Level2Desc  
+  , 'DesignworksLevel3' AS Level3ID 
+  , 'Designworks Level 3' AS Level3Desc 
+  , 'DesignworksLevel4' AS Level4ID 
+  , 'Designworks Level 4' AS Level4Desc 
+  , 'Wholesale' AS Level5ID  
+  , 'Wholesale' AS Level5Desc 
+  , 'AU' AS Level6ID 
+  , 'Australia' AS Level6Desc 
+  , 'WarehouseAU' AS locationID
+  , 'WarehouseAU' AS LocationDesc   
+  , NULL AS SQM
+  , NULL AS DimAtt1 --Territory
+  , NULL AS DimAtt2 --Region
+  , NULL AS DimAtt3 --Climate  
+UNION ALL
+SELECT 'TOTAL' AS TotalID
+  , 'Total' AS TotalDesc 
+  , 'DW' AS Level2ID 
+  , 'Designworks' AS Level2Desc  
+  , 'DesignworksLevel3' AS Level3ID 
+  , 'Designworks Level 3' AS Level3Desc 
+  , 'DesignworksLevel4' AS Level4ID 
+  , 'Designworks Level 4' AS Level4Desc 
+  , 'Wholesale' AS Level5ID 
+  , 'Wholesale' AS Level5Desc 
+  , 'NZ' AS Level6ID 
+  , 'New Zealand' AS Level6Desc 
+  , 'WarehouseNZ' AS locationID
+  , 'WarehouseNZ' AS LocationDesc  
+  , NULL AS SQM
+  , NULL AS DimAtt1 --Territory
+  , NULL AS DimAtt2 --Region
+  , NULL AS DimAtt3 --Climate 
