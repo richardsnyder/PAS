@@ -1,5 +1,10 @@
 SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId 
-  ,CAST('WHOLESALE' AS NVARCHAR(50)) AS LocationID 
+  ,CAST(
+    CASE
+      WHEN MatWarehouse.WarehouseCode = 'DWMain' THEN 'WarehouseAU'
+      WHEN MatWarehouse.WarehouseCode = 'DWNZ' THEN 'WarehouseNZ'
+    END
+   AS NVARCHAR(50)) AS LocationID 
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID 
   ,CAST(SUM(FactStock.OnHandQuantity) AS INT) AS OSOH_U
@@ -67,4 +72,5 @@ WHERE (MatWarehouse.WarehouseType = 'W')
 GROUP BY CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) 
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50))
+  ,MatWarehouse.WarehouseCode
 ORDER BY 3
