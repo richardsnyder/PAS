@@ -1,8 +1,8 @@
 SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourId
   ,CAST(
     CASE 
-      WHEN MatWarehouse.WarehouseCode =  'DWMain' THEN 'WarehouseAU'
-      WHEN MatWarehouse.WarehouseCode = 'DWNZ' THEN 'WarehouseNZ'
+     WHEN MatWarehouse.WarehouseCode = 'DWNZ' OR MatWarehouse.WarehouseCode = 'DWChinaNZ' THEN 'WarehouseNZ'
+     ELSE 'WarehouseAU'
      END AS NVARCHAR(50)) AS LocationId
   ,CAST('WHOLESALE' AS NVARCHAR(50)) AS LocationID 
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
