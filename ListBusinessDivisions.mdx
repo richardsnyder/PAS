@@ -1,0 +1,10 @@
+WITH MEMBER [Measures].[ParameterCaption]
+AS [Business Division].[Business Division Name].CURRENTMEMBER.MEMBER_CAPTION 
+MEMBER [Measures].[ParameterValue] AS [Business Division].[Business Division Name].CURRENTMEMBER.UNIQUENAME MEMBER [Measures].[ParameterLevel] AS [Business Division].[Business Division Name].CURRENTMEMBER.LEVEL.ORDINAL 
+SELECT { [Measures].[ParameterCaption]
+	,[Measures].[ParameterValue]
+	,[Measures].[ParameterLevel] } ON COLUMNS
+	,[Business Division].[Business Division Name].ALLMEMBERS ON ROWS FROM (
+	SELECT ({ [Date].[Relative Retail Year To Date].& [Last Year Ret YTD] }) ON COLUMNS
+	FROM [Retail]
+	)

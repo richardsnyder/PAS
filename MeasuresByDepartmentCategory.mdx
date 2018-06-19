@@ -1,0 +1,31 @@
+SELECT NON EMPTY { [Measures].[Sales Excluding Tax Foreign],
+         [Measures].[Gross Profit $],
+         [Measures].[Gross Profit %],
+         [Measures].[On Hand Current Price Foreign],
+         [Measures].[Transaction Count],
+         [Measures].[UPT],
+         [Measures].[ASP $],
+         [Measures].[ATV $],
+         [Measures].[Conversion %],
+         [Measures].[Foot Traffic],
+         [Measures].[Sale Quantity] }
+    ON COLUMNS, NON EMPTY { ([Product].[Department].[Department].ALLMEMBERS  * [Product].[Category].[Category].ALLMEMBERS )} DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_VALUE, MEMBER_UNIQUE_NAME
+    ON ROWS
+FROM 
+    (SELECT ( [Business Division].[Business Division Name].&[Black Pepper Brands])
+        ON COLUMNS
+    FROM 
+        (SELECT ( { [Date].[Relative Last 4 Weeks].&[Last 4 Weeks] } )
+            ON COLUMNS
+        FROM [Retail]))
+    WHERE ( [Date].[Relative Last 4 Weeks].&[Last 4 Weeks],
+         IIF( [Business Division].[Business Division Name].&[Black Pepper Brands].Count = 1,
+         [Business Division].[Business Division Name].&[Black Pepper Brands],
+         [Business Division].[Business Division Name].currentmember ) ) CELL PROPERTIES VALUE,
+         BACK_COLOR,
+         FORE_COLOR,
+         FORMATTED_VALUE,
+         FORMAT_STRING,
+         FONT_NAME,
+         FONT_SIZE,
+         FONT_FLAGS
