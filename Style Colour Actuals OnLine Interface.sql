@@ -1,5 +1,5 @@
 SELECT CAST(MatProduct.StyleColourCode AS NVARCHAR(50)) AS StyleColourID 
-  ,CAST('ONLINE' AS NVARCHAR(50)) AS LocationID
+  ,CAST('ONLINEAU' AS NVARCHAR(50)) AS LocationID
   ,CAST(CAST(DimDate.RetailYear AS NVARCHAR(4)) + CAST(FORMAT(DimDate.RetailWeek,'00') AS NVARCHAR(4)) AS NVARCHAR(50)) AS TimeID 
   ,CAST(MatProduct.StyleSeasonCode AS NVARCHAR(50)) AS SeasonID
   ,CAST(0 AS NUMERIC(16 ,2)) AS Sales_D
