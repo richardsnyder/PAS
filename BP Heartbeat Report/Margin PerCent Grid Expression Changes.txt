@@ -1,0 +1,30 @@
+=Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "Category4Wk") - Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "Category4WkLY")
+=Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "Category8Wk") - Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "Category8WkLY")
+=Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "Category12Wk") - Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "Category12WkLY")
+=Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "CategorySummerSTD") - Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "CategorySummerSTDLY")
+=Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "CategoryWinterSTD") - Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "CategoryWinterSTDLY")
+=Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "CategoryYTD") - Lookup(Fields!CategoryCode.Value, Fields!Category.Value, Fields!GPP.Value, "CategoryYTDLY")
+
+
+=(Code.SafeDivide(SUM(Fields!GP.Value, "Category4Wk"), SUM(Fields!Sales.Value, "Category4Wk"))) - (Code.SafeDivide(SUM(Fields!GP.Value, "Category4WkLY"),SUM(Fields!Sales.Value, "Category4WkLY")))
+=(Code.SafeDivide(SUM(Fields!GP.Value, "Category8Wk"), SUM(Fields!Sales.Value, "Category8Wk"))) - (Code.SafeDivide(SUM(Fields!GP.Value, "Category8WkLY"),SUM(Fields!Sales.Value, "Category8WkLY")))
+=(Code.SafeDivide(SUM(Fields!GP.Value, "Category12Wk"), SUM(Fields!Sales.Value, "Category12Wk"))) - (Code.SafeDivide(SUM(Fields!GP.Value, "Category12WkLY"),SUM(Fields!Sales.Value, "Category12WkLY")))
+=(Code.SafeDivide(SUM(Fields!GP.Value, "CategorySummerSTD"), SUM(Fields!Sales.Value, "CategorySummerSTD"))) - (Code.SafeDivide(SUM(Fields!GP.Value, "CategorySummerSTDLY"),SUM(Fields!Sales.Value, "CategorySummerSTDLY")))
+=(Code.SafeDivide(SUM(Fields!GP.Value, "CategoryWinterSTD"), SUM(Fields!Sales.Value, "CategoryWinterSTD"))) - (Code.SafeDivide(SUM(Fields!GP.Value, "CategoryWinterSTDLY"),SUM(Fields!Sales.Value, "CategoryWinterSTDLY")))
+=(Code.SafeDivide(SUM(Fields!GP.Value, "CategoryYTD"), SUM(Fields!Sales.Value, "CategoryYTD"))) - (Code.SafeDivide(SUM(Fields!GP.Value, "CategoryYTDLY"),SUM(Fields!Sales.Value, "CategoryYTDLY")))
+
+
+
+=Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "Territory4Wk") - Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "Territory4WkLY")
+=Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "Territory8Wk") - Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "Territory8WkLY")
+=Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "Territory12Wk") - Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "Territory12WkLY")
+=Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "TerritorySummerSTD") - Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "TerritorySummerSTDLY")
+=Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "TerritoryWinterSTD") - Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "TerritoryWinterSTDLY")
+=Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "TerritoryYTD") - Lookup(Fields!TerritoryCode.Value, Fields!Territory.Value, Fields!Conversion.Value, "TerritoryYTDLY")
+
+=Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "Territory4Wk"), SUM(Fields!FootTraffic.Value, "Territory4Wk")) - Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "Territory4WkLY"), SUM(Fields!FootTraffic.Value, "Territory4WkLY"))
+=Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "Territory8Wk"), SUM(Fields!FootTraffic.Value, "Territory8Wk")) - Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "Territory8WkLY"), SUM(Fields!FootTraffic.Value, "Territory8WkLY"))
+=Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "Territory12Wk"), SUM(Fields!FootTraffic.Value, "Territory12Wk")) - Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "Territory12WkLY"), SUM(Fields!FootTraffic.Value, "Territory12WkLY"))
+=Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "TerritorySummerSTD"), SUM(Fields!FootTraffic.Value, "TerritorySummerSTD")) - Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "TerritorySummerSTDLY"), SUM(Fields!FootTraffic.Value, "TerritorySummerSTDLY"))
+=Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "TerritoryWinterSTD"), SUM(Fields!FootTraffic.Value, "TerritoryWinterSTD")) - Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "TerritoryWinterSTDLY"), SUM(Fields!FootTraffic.Value, "TerritoryWinterSTDLY"))
+=Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "TerritoryYTD"), SUM(Fields!FootTraffic.Value, "TerritoryYTD")) - Code.SafeDivide(SUM(Fields!TransactionCountPeopleCounter.Value, "TerritoryYTDLY"), SUM(Fields!FootTraffic.Value, "TerritoryYTDLY"))
