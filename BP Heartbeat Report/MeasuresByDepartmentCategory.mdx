@@ -9,7 +9,7 @@ SELECT NON EMPTY { [Measures].[Sales Excluding Tax Foreign],
          [Measures].[Conversion %],
          [Measures].[Foot Traffic],
          [Measures].[Sale Quantity] }
-    ON COLUMNS, NON EMPTY { ([Product].[Department].[Department].ALLMEMBERS  * [Product].[Category].[Category].ALLMEMBERS )} DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_VALUE, MEMBER_UNIQUE_NAME
+    ON COLUMNS, NON EMPTY { ([Product].[Category].[Category].ALLMEMBERS )} DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_VALUE, MEMBER_UNIQUE_NAME
     ON ROWS
 FROM 
     (SELECT ( [Business Division].[Business Division Name].&[Black Pepper Brands])
