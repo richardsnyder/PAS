@@ -97,6 +97,13 @@ WHEN MATCHED AND
   OR ISNULL(Source.Chris21_Code,'') != ISNULL(Destination.Chris21_Code,'')
   OR ISNULL(Source.Chris21_Description,'') != ISNULL(Destination.Chris21_Description,'')
   OR ISNULL(Source.Chris21_CompanySourceCode,'') != ISNULL(Destination.Chris21_CompanySourceCode,'')
+  OR ISNULL(Source.DataWarehouse_BusinessDivisionId,'') != ISNULL(Destination.DataWarehouse_BusinessDivisionId,'')
+  OR ISNULL(Source.DataWarehouse_SourceKey,'') != ISNULL(Destination.DataWarehouse_SourceKey,'')
+  OR ISNULL(Source.DataWarehouse_Code,'') != ISNULL(Destination.DataWarehouse_Code,'')
+  OR ISNULL(Source.DataWarehouse_Name,'') != ISNULL(Destination.DataWarehouse_Name,'')
+  OR ISNULL(Source.DataWarehouse_ABN,'') != ISNULL(Destination.DataWarehouse_ABN,'')
+  OR ISNULL(Source.DataWarehouse_ACN,'') != ISNULL(Destination.DataWarehouse_ACN,'')
+  OR ISNULL(Source.DataWarehouse_Logo,CAST('' AS VARBINARY(MAX))) != ISNULL(Destination.DataWarehouse_Logo,CAST('' AS VARBINARY(MAX)))
 
 THEN UPDATE
 SET Destination.Chris21_SourceLevel = Source.Chris21_SourceLevel

@@ -56,7 +56,19 @@ WHEN NOT MATCHED BY TARGET
     , UpdateUser
     , CreateDate
     , CreateUser)
-      VALUES (Source.Chris21_SourceLevel, Source.Chris21_SourceCode, Source.Chris21_Code, Source.Chris21_Name, Source.DataWarehouseCompany_Id, Source.DataWarehouseCompany_SourceKey, Source.DataWarehouseCompany_Code, Source.DataWarehouseCompany_Name, Source.DataWarehouseCompany_IsActive, NULL, NULL, current_timestamp, system_user)
+      VALUES (Source.Chris21_SourceLevel
+      , Source.Chris21_SourceCode
+      , Source.Chris21_Code
+      , Source.Chris21_Name
+      , Source.DataWarehouseCompany_Id
+      , Source.DataWarehouseCompany_SourceKey
+      , Source.DataWarehouseCompany_Code
+      , Source.DataWarehouseCompany_Name
+      , Source.DataWarehouseCompany_IsActive
+      , NULL
+      , NULL
+      , CURRENT_TIMESTAMP
+      , system_user)
 
 WHEN MATCHED
   AND ISNULL(Source.Chris21_SourceLevel, '') != ISNULL(Destination.Chris21_SourceLevel, '')
@@ -64,6 +76,10 @@ WHEN MATCHED
   OR ISNULL(Source.Chris21_Code, '') != ISNULL(Destination.Chris21_Code, '')
   OR ISNULL(Source.Chris21_Name, '') != ISNULL(Destination.Chris21_Name, '')
   OR ISNULL(Source.DataWarehouseCompany_Id, '') != ISNULL(Destination.DataWarehouseCompany_Id, '')
+  OR ISNULL(Source.DataWarehouseCompany_SourceKey, '') != ISNULL(Destination.DataWarehouseCompany_SourceKey, '')
+  OR ISNULL(Source.DataWarehouseCompany_Code, '') != ISNULL(Destination.DataWarehouseCompany_Code, '')
+  OR ISNULL(Source.DataWarehouseCompany_Name, '') != ISNULL(Destination.DataWarehouseCompany_Name, '')
+  OR ISNULL(Source.DataWarehouseCompany_IsActive, '') != ISNULL(Destination.DataWarehouseCompany_IsActive, '')
 
   THEN UPDATE
     SET Destination.Chris21_SourceLevel = Source.Chris21_SourceLevel 
