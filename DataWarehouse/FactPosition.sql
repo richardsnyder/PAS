@@ -43,59 +43,63 @@ IF OBJECT_ID('tempdb..#StageData') IS NOT NULL DROP TABLE #StageData
    ,Staging_EMPOS.POS_L5_CD
    ,Staging_EMPOS.POS_L6_CD
    ,Staging_EMPOS.POS_TITLE
+   ,Staging_EMPAY.PYD_TYPE 
   INTO #StageData
   FROM DataWarehouseChris21RawData.dbo.Staging_EMPOS
   INNER JOIN DataWarehouseChris21.dbo.DimEmployee
   ON DimEmployee.DET_NUMBER = Staging_EMPOS.DET_NUMBER
+  LEFT JOIN DataWarehouseChris21RawData.dbo.Staging_EMPAY Staging_EMPAY
+  ON Staging_EMPAY.DET_NUMBER = Staging_EMPOS.DET_NUMBER
 
 /* Add the records that have a POS_END Date
    These will only be added for the calendar dates
    between POS_START and POS_END
 */
-INSERT INTO [dbo].[FactPosition]
-           ([PostionDate]
-           ,[EmployeeId]
-           ,[Employee_Number]
-           ,[POS_START]
-           ,[POS_END]
-           ,[POS_LVE_GRP]
-           ,[POS_HOL_ZONE]
-           ,[POS_EMP_NOM]
-           ,[POS_EMP_N_ST]
-           ,[POS_EMP_OCC]
-           ,[POS_AV_HR_WK]
-           ,[POS_OT_PAY]
-           ,[POS_ANL_GRP]
-           ,[POS_COST_GRP]
-           ,[POS_SEC_LVL]
-           ,[POS_PERC_WKD]
-           ,[POS_STATUS]
-           ,[POS_DAYS_WK]
-           ,[POS_TT_AW_ID]
-           ,[POS_SHARE]
-           ,[POS_RT_ZAI]
-           ,[POS_NUMBER]
-           ,[POS_PDT_STRT]
-           ,[POS_PDT_END]
-           ,[POS_CATEG_CD]
-           ,[POS_CLS_CODE]
-           ,[POS_PDT_STAT]
-           ,[POS_PDT_HRS]
-           ,[POS_PDT_OT]
-           ,[POS_PDT_ANL]
-           ,[POS_PDT_COST]
-           ,[POS_PDT_SEC]
-           ,[POS_PDT_ZAS]
-           ,[POS_PDT_ZDR]
-           ,[POS_INDUSTRY]
-           ,[POS_L0_CD]
-           ,[POS_L1_CD]
-           ,[POS_L2_CD]
-           ,[POS_L3_CD]
-           ,[POS_L4_CD]
-           ,[POS_L5_CD]
-           ,[POS_L6_CD]
-           ,[POS_TITLE])
+INSERT INTO dbo.FactPosition
+           (PostionDate
+           ,EmployeeId
+           ,Employee_Number
+           ,POS_START
+           ,POS_END
+           ,POS_LVE_GRP
+           ,POS_HOL_ZONE
+           ,POS_EMP_NOM
+           ,POS_EMP_N_ST
+           ,POS_EMP_OCC
+           ,POS_AV_HR_WK
+           ,POS_OT_PAY
+           ,POS_ANL_GRP
+           ,POS_COST_GRP
+           ,POS_SEC_LVL
+           ,POS_PERC_WKD
+           ,POS_STATUS
+           ,POS_DAYS_WK
+           ,POS_TT_AW_ID
+           ,POS_SHARE
+           ,POS_RT_ZAI
+           ,POS_NUMBER
+           ,POS_PDT_STRT
+           ,POS_PDT_END
+           ,POS_CATEG_CD
+           ,POS_CLS_CODE
+           ,POS_PDT_STAT
+           ,POS_PDT_HRS
+           ,POS_PDT_OT
+           ,POS_PDT_ANL
+           ,POS_PDT_COST
+           ,POS_PDT_SEC
+           ,POS_PDT_ZAS
+           ,POS_PDT_ZDR
+           ,POS_INDUSTRY
+           ,POS_L0_CD
+           ,POS_L1_CD
+           ,POS_L2_CD
+           ,POS_L3_CD
+           ,POS_L4_CD
+           ,POS_L5_CD
+           ,POS_L6_CD
+           ,POS_TITLE
+           ,PAYPOSITIONTYPE)
 SELECT
  DimDate.CalendarDate
  ,StageData.EmployeeId
@@ -140,61 +144,63 @@ SELECT
  ,StageData.POS_L5_CD
  ,StageData.POS_L6_CD
  ,StageData.POS_TITLE
+ ,StageData.PYD_TYPE
 FROM #StageData StageData
 INNER JOIN DimDate 
 ON DimDate.CalendarDate BETWEEN StageData.POS_START AND StageData.POS_END
 WHERE StageData.POS_END IS NOT NULL
-AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId AND FactPosition.PostionDate = DimDate.CalendarDate)
+AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId)
 
 /* Add the records that have NO POS_END Date
    These will be added for the calendar dates
    between POS_START until the position ends 
    POS_END is not null
 */
-INSERT INTO [dbo].[FactPosition]
-           ([PostionDate]
-           ,[EmployeeId]
-           ,[Employee_Number]
-           ,[POS_START]
-           ,[POS_END]
-           ,[POS_LVE_GRP]
-           ,[POS_HOL_ZONE]
-           ,[POS_EMP_NOM]
-           ,[POS_EMP_N_ST]
-           ,[POS_EMP_OCC]
-           ,[POS_AV_HR_WK]
-           ,[POS_OT_PAY]
-           ,[POS_ANL_GRP]
-           ,[POS_COST_GRP]
-           ,[POS_SEC_LVL]
-           ,[POS_PERC_WKD]
-           ,[POS_STATUS]
-           ,[POS_DAYS_WK]
-           ,[POS_TT_AW_ID]
-           ,[POS_SHARE]
-           ,[POS_RT_ZAI]
-           ,[POS_NUMBER]
-           ,[POS_PDT_STRT]
-           ,[POS_PDT_END]
-           ,[POS_CATEG_CD]
-           ,[POS_CLS_CODE]
-           ,[POS_PDT_STAT]
-           ,[POS_PDT_HRS]
-           ,[POS_PDT_OT]
-           ,[POS_PDT_ANL]
-           ,[POS_PDT_COST]
-           ,[POS_PDT_SEC]
-           ,[POS_PDT_ZAS]
-           ,[POS_PDT_ZDR]
-           ,[POS_INDUSTRY]
-           ,[POS_L0_CD]
-           ,[POS_L1_CD]
-           ,[POS_L2_CD]
-           ,[POS_L3_CD]
-           ,[POS_L4_CD]
-           ,[POS_L5_CD]
-           ,[POS_L6_CD]
-           ,[POS_TITLE])
+INSERT INTO dbo.FactPosition
+           (PostionDate
+           ,EmployeeId
+           ,Employee_Number
+           ,POS_START
+           ,POS_END
+           ,POS_LVE_GRP
+           ,POS_HOL_ZONE
+           ,POS_EMP_NOM
+           ,POS_EMP_N_ST
+           ,POS_EMP_OCC
+           ,POS_AV_HR_WK
+           ,POS_OT_PAY
+           ,POS_ANL_GRP
+           ,POS_COST_GRP
+           ,POS_SEC_LVL
+           ,POS_PERC_WKD
+           ,POS_STATUS
+           ,POS_DAYS_WK
+           ,POS_TT_AW_ID
+           ,POS_SHARE
+           ,POS_RT_ZAI
+           ,POS_NUMBER
+           ,POS_PDT_STRT
+           ,POS_PDT_END
+           ,POS_CATEG_CD
+           ,POS_CLS_CODE
+           ,POS_PDT_STAT
+           ,POS_PDT_HRS
+           ,POS_PDT_OT
+           ,POS_PDT_ANL
+           ,POS_PDT_COST
+           ,POS_PDT_SEC
+           ,POS_PDT_ZAS
+           ,POS_PDT_ZDR
+           ,POS_INDUSTRY
+           ,POS_L0_CD
+           ,POS_L1_CD
+           ,POS_L2_CD
+           ,POS_L3_CD
+           ,POS_L4_CD
+           ,POS_L5_CD
+           ,POS_L6_CD
+           ,POS_TITLE
+           ,PAYPOSITIONTYPE)
 
 SELECT
  DimDate.CalendarDate
@@ -240,10 +246,12 @@ SELECT
  ,StageData.POS_L5_CD
  ,StageData.POS_L6_CD
  ,StageData.POS_TITLE
+ ,StageData.PYD_TYPE
 FROM #StageData StageData
 INNER JOIN DimDate 
 ON DimDate.CalendarDate BETWEEN StageData.POS_START AND CAST(GETDATE() AS DATE)
 WHERE StageData.POS_END IS NULL
-AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId AND FactPosition.PostionDate != DimDate.CalendarDate)
+AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId AND FactPosition.PostionDate = DimDate.CalendarDate)
 
 DROP TABLE #StageData
+
