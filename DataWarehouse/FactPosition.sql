@@ -56,7 +56,7 @@ IF OBJECT_ID('tempdb..#StageData') IS NOT NULL DROP TABLE #StageData
    between POS_START and POS_END
 */
 INSERT INTO dbo.FactPosition
-           (PostionDate
+           (PositionDate
            ,EmployeeId
            ,Employee_Number
            ,POS_START
@@ -157,7 +157,7 @@ AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = Stage
    POS_END is not null
 */
 INSERT INTO dbo.FactPosition
-           (PostionDate
+           (PositionDate
            ,EmployeeId
            ,Employee_Number
            ,POS_START
@@ -251,7 +251,7 @@ FROM #StageData StageData
 INNER JOIN DimDate 
 ON DimDate.CalendarDate BETWEEN StageData.POS_START AND CAST(GETDATE() AS DATE)
 WHERE StageData.POS_END IS NULL
-AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId AND FactPosition.PostionDate = DimDate.CalendarDate)
+AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId AND FactPosition.PositionDate = DimDate.CalendarDate)
 
 DROP TABLE #StageData
 
