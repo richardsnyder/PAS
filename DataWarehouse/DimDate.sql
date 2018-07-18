@@ -1,4 +1,4 @@
-
+SET DATEFIRST 1
 SELECT
   CalendarDate
  ,CalendarDayName
