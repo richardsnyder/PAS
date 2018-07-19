@@ -19,7 +19,7 @@ AS
    ,DimDate.FinancialMonthEnd
   FROM dbo.DimEmployee DimEmployee
   CROSS JOIN dbo.DimDate
---  WHERE DimDate.FinancialMonthId = 103
+--  WHERE DimDate.FinancialMonthId = 102
 ),
 Positions AS
 (
@@ -36,7 +36,7 @@ Positions AS
   FROM dbo.FactPosition
   INNER JOIN dbo.DimDate
   ON DimDate.CalendarDate = FactPosition.PositionDate
---  WHERE DimDate.FinancialMonthId = 103
+--  WHERE DimDate.FinancialMonthId = 102
 )
 
 INSERT INTO dbo.FactHeadCount
@@ -55,7 +55,7 @@ SELECT
   ,Employees.Id EmployeeId
   ,Employees.HeadCount
   ,Positions.Chris21DivisionCode
-  ,DimBusinessDivision.Id BusinessDivisinId
+  ,DimBusinessDivision.DataWarehouse_BusinessDivisionId BusinessDivisinId
   ,Positions.Chris21ProfitCentre
   ,Employees.DET_NUMBER
   ,Employees.DateJoined
@@ -67,6 +67,8 @@ AND Positions.RN = 1
 LEFT JOIN DimBusinessDivision
 ON DimBusinessDivision.Chris21_SourceCode = Positions.Chris21DivisionCode
 WHERE HeadCount <>0
+-- AND Employees.FinancialMonthId = 102
+-- AND Chris21DivisionCode = 'RE'
 ORDER BY 1,2
 
 --SELECT * FROM DimDate dpd WHERE FinancialMonthId = 186 ORDER BY 1  --186
@@ -80,3 +82,4 @@ ORDER BY 1,2
 
 --SELECT * FROM DataWarehouseChris21RawData.dbo.Staging_EMDET WHERE DET_NUMBER IN ('04738')
 
+--SELECT * FROM DimBusinessDivision
