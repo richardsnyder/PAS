@@ -45,11 +45,11 @@ Positions AS
 INSERT INTO dbo.FactHeadCount
            (FinancialMonthId
            ,EmployeeId
+           ,EmployeeNumber
            ,HeadCount
            ,Chris21DivisionCode
            ,BusinessDivisinId
            ,Chris21ProfitCentre
-           ,DET_NUMBER
            ,PositionTitle
            ,PositionNumber
            ,DateJoined
@@ -58,11 +58,11 @@ INSERT INTO dbo.FactHeadCount
 SELECT
   Employees.FinancialMonthId
   ,Employees.Id EmployeeId
+  ,Employees.DET_NUMBER
   ,Employees.HeadCount
   ,Positions.Chris21DivisionCode
   ,DimBusinessDivision.DataWarehouse_BusinessDivisionId BusinessDivisinId
   ,Positions.Chris21ProfitCentre
-  ,Employees.DET_NUMBER
   ,Positions.POS_TITLE
   ,Positions.POS_NUMBER
   ,Employees.DateJoined

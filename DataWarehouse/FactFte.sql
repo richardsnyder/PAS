@@ -1,29 +1,15 @@
 TRUNCATE TABLE dbo.FactFte;
 
-USE DataWarehouseChris21
-GO
-
-INSERT INTO dbo.FactFte (EmployeeId
-, EmployeeNumber
-, FinancialMonthId
-, PayRun
-, PayDate
-, PayType
-, ContractHours
-, WorkedHours
-, FTE)
-
+WITH FTE AS
+(
   SELECT
     FactPayRunSummary.EmployeeId
    ,FactPayRunSummary.EmployeeNumber
    ,DimDate.FinancialMonthId
-   ,FactPayRunSummary.PHQ_RUN_NUMB AS PayRun
-   ,FactPayRunSummary.PHQ_PAY_DATE AS PayDate
    ,DimEmployee.Pay_PayType AS PayType
    ,FactPosition.POS_AV_HR_WK AS ContractHours
    ,SUM(FactPayRunSummary.PHQ_BASE_HRS) AS WorkedHours
-   ,CAST(
-    SUM(
+   ,CAST(SUM(
     CASE
       WHEN DimEmployee.Pay_PayType IN (30, 31, 33, 34, 35, 36, 50, 52, 53, 54, 55, 56, 57) THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.MonthlyFullTimeHours38Hrs --1
       WHEN DimEmployee.Pay_PayType IN (32, 51) THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.HrDashboardFortNightHours --2
@@ -48,26 +34,69 @@ INSERT INTO dbo.FactFte (EmployeeId
   GROUP BY FactPayRunSummary.EmployeeId
           ,FactPayRunSummary.EmployeeNumber
           ,DimDate.FinancialMonthId
-          ,FactPayRunSummary.PHQ_RUN_NUMB
-          ,FactPayRunSummary.PHQ_PAY_DATE
+          --,FactPayRunSummary.PHQ_RUN_NUMB
+          --,FactPayRunSummary.PHQ_PAY_DATE
           ,FactPosition.POS_AV_HR_WK
           ,DimEmployee.Pay_PayType
-  ORDER BY 3, 1, 4 DESC
+),
 
-  --SELECT MIN(PIT_RUN_DATE), MAX(PIT_RUN_DATE)
-  --FROM DataWarehouseChris21.dbo.FactPayRunDetails
-  --WHERE EmployeeNumber = '03808'
+Positions AS
+(
+  SELECT DISTINCT
+  EmployeeId
+  ,Employee_Number
+  ,POS_START
+  ,POS_END 
+  ,POS_TITLE
+  ,POS_NUMBER
+  ,POS_L2_CD AS Chris21DivisionCode
+  ,POS_L4_CD AS Chris21PositionCode
+  ,POS_L5_CD AS Chris21ProfitCentre
+  ,POS_L5_CD + POS_L4_CD AS Chris21ProfitCentreSourceKey
+  ,POS_L6_CD AS Chris21State
+  ,RN = ROW_NUMBER()OVER(PARTITION BY EmployeeId ORDER BY EmployeeId)
+  FROM dbo.FactPosition
+  INNER JOIN dbo.DimDate
+  ON DimDate.CalendarDate = FactPosition.PositionDate
+--  WHERE DimDate.FinancialMonthId = 102
+)
 
---SELECT DISTINCT pay_paytype FROM DimEmployee ORDER BY 1
+--SELECT * FROM FTE
+--LEFT JOIN Positions
+--ON Positions.EmployeeId = FTE.EmployeeId
+--AND Positions.RN = 1
+--WHERE FinancialMonthId = 90
+--AND FTE.EmployeeId IN (361,536,2263,672)
+--ORDER BY 1
 
---SELECT TOP 100 * FROM dimdate
+INSERT INTO dbo.FactFte
+           (FinancialMonthId
+           ,EmployeeId
+           ,EmployeeNumber
+           ,FTE
+           ,Chris21DivisionCode
+           ,BusinessDivisionId
+           ,Chris21ProfitCentre
+           ,PositionTitle
+           ,PositionNumber)
 
-
---SELECT * FROM Dimdate where calendardate = '15-Jun-2017' = 90
---SET DATEFIRST 1
---SELECT COUNT(*) from  dimdate WHERE financialmonthid = 90 AND DATEPART(dw,calendardate) BETWEEN 1 AND 5
-
-
---SELECT distinct PayPositionType FROM FactPosition WHERE /*PositionDate = '15-May-2017' AND*/ EmployeeId = 104
-
---SELECT DISTINCT DimEmployee.Pay_PayType FROM DimEmployee ORDER BY 1
+SELECT
+  FTE.FinancialMonthId
+  ,FTE.EmployeeId EmployeeId
+  ,FTE.EmployeeNumber
+  ,FTE.FTE
+  ,Positions.Chris21DivisionCode
+  ,DimBusinessDivision.DataWarehouse_BusinessDivisionId BusinessDivisinId
+  ,Positions.Chris21ProfitCentre
+  ,Positions.POS_TITLE
+  ,Positions.POS_NUMBER
+FROM FTE
+LEFT JOIN Positions
+ON Positions.EmployeeId = FTE.EmployeeId
+AND Positions.RN = 1
+LEFT JOIN DimBusinessDivision
+ON DimBusinessDivision.Chris21_SourceCode = Positions.Chris21DivisionCode
+WHERE FTE.FTE <>0
+--AND FinancialMonthId = 90
+--AND FTE.EmployeeId IN (361,536,2263,672)
+ORDER BY 1,2
