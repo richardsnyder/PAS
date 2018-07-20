@@ -25,8 +25,11 @@ Positions AS
 (
   SELECT DISTINCT
   EmployeeId
+  ,Employee_Number
   ,POS_START
-  ,POS_END
+  ,POS_END 
+  ,POS_TITLE
+  ,POS_NUMBER
   ,POS_L2_CD AS Chris21DivisionCode
   ,POS_L4_CD AS Chris21PositionCode
   ,POS_L5_CD AS Chris21ProfitCentre
@@ -47,6 +50,8 @@ INSERT INTO dbo.FactHeadCount
            ,BusinessDivisinId
            ,Chris21ProfitCentre
            ,DET_NUMBER
+           ,PositionTitle
+           ,PositionNumber
            ,DateJoined
            ,TerminationDate)
 
@@ -58,6 +63,8 @@ SELECT
   ,DimBusinessDivision.DataWarehouse_BusinessDivisionId BusinessDivisinId
   ,Positions.Chris21ProfitCentre
   ,Employees.DET_NUMBER
+  ,Positions.POS_TITLE
+  ,Positions.POS_NUMBER
   ,Employees.DateJoined
   ,Employees.TerminationDate
 FROM Employees
@@ -67,18 +74,23 @@ AND Positions.RN = 1
 LEFT JOIN DimBusinessDivision
 ON DimBusinessDivision.Chris21_SourceCode = Positions.Chris21DivisionCode
 WHERE HeadCount <>0
--- AND Employees.FinancialMonthId = 102
+-- AND Employees.FinancialMonthId = 54
 -- AND Chris21DivisionCode = 'RE'
+-- AND Employees.Id = 1
 ORDER BY 1,2
 
---SELECT * FROM DimDate dpd WHERE FinancialMonthId = 186 ORDER BY 1  --186
+--SELECT * FROM FactHeadCount fhc WHERE Chris21ProfitCentre IS null order by 2,1
+
+--SELECT * FROM DimDate dpd WHERE FinancialMonthId = 60 ORDER BY 1  --186
 
 --SELECT * 
 --FROM FactPosition
 --INNER JOIN DimDate 
 --ON DimDate.CalendarDate = FactPosition.PositionDate
---AND DimDate.FinancialMonthId = 102
---WHERE EmployeeId = 4079
+----AND DimDate.FinancialMonthId = 103
+--WHERE EmployeeId = 4128
+
+--select * FROM DimEmployee WHERE id in (4131,4132)
 
 --SELECT * FROM DataWarehouseChris21RawData.dbo.Staging_EMDET WHERE DET_NUMBER IN ('04738')
 
