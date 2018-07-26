@@ -4,7 +4,7 @@ SELECT DISTINCT DimDate.FinancialMonthId
 , CAST(FinancialYear AS VARCHAR(4)) + ' - '+FinancialMonthName DisplayName
 INTO #FinPeriods
 FROM DimDate
-WHERE DimDate.CalendarDate >= DATEADD(YEAR, -3, CAST(GETDATE() AS DATE))
+WHERE DimDate.CalendarDate Between DATEADD(YEAR, -3, CAST(GETDATE() AS DATE)) AND DATEADD(YEAR, 1, CAST(GETDATE() AS DATE))
 
 SELECT FactHeadCount.FinancialMonthId
  ,FinPeriods.DisplayName
@@ -14,6 +14,7 @@ SELECT FactHeadCount.FinancialMonthId
  ,DimProfitCentre.Chris21_ProfitCentreName
  ,FactHeadCount.PositionTitle FullPositionTitle
  ,LTRIM(RTRIM(REPLACE(FactHeadCount.PositionTitle,FactHeadCount.Chris21ProfitCentre + ' ' + DimProfitCentre.Chris21_ProfitCentreName,'' ))) ShortPositionTitle
+ ,DimAreaManager.AreaManagerId
  ,DimAreaManager.AreaManagerName
  ,DimProfitCentre.DataWarehouse_ProfitCentreName
  ,DimProfitCentre.DataWarehouse_State State
@@ -23,21 +24,26 @@ SELECT FactHeadCount.FinancialMonthId
 FROM FactHeadCount
 LEFT JOIN DimProfitCentre 
 ON DimProfitCentre.Chris21_SourceCode = FactHeadCount.Chris21ProfitCentre
+AND DimProfitCentre.Chris21_BusinessDivisionCode = FactHeadCount.Chris21DivisionCode
 INNER JOIN #FinPeriods FinPeriods
 ON FinPeriods.FinancialMonthId = FactHeadCount.FinancialMonthId
 LEFT JOIN DimAreaManager
-ON DimAreaManager.Chris21ProfitCentre = FactHeadCount.Chris21ProfitCentre
+ON DimAreaManager.AreaManagerId = DimProfitCentre.DataWarehouse_AreaManagerId
+
+WHERE FactHeadCount.Chris21DivisionCode = 'bb'
+
 GROUP BY FactHeadCount.FinancialMonthId
          ,FinPeriods.DisplayName
         ,Chris21DivisionCode
         ,FactHeadCount.Chris21ProfitCentre
+        ,DimAreaManager.AreaManagerId
         ,DimAreaManager.AreaManagerName
         ,DimProfitCentre.Chris21_ProfitCentreName
         ,FactHeadCount.PositionTitle
         ,DimProfitCentre.DataWarehouse_ProfitCentreName
         ,DimProfitCentre.DataWarehouse_State
         ,DimProfitCentre.DataWarehouse_Country
- ,DimProfitCentre.DataWarehouse_ProfitCentreType
+        ,DimProfitCentre.DataWarehouse_ProfitCentreType
 ORDER BY FinancialMonthId, BusinessDivisionCode, ProfitCentreCode
 
 DROP TABLE #FinPeriods
