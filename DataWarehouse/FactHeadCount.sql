@@ -22,8 +22,6 @@ AS
   INNER JOIN FactPosition
   ON FactPosition.EmployeeId = DimEmployee.Id
   AND FactPosition.PositionDate = DimDate.CalendarDate
-WHERE FinancialMonthId = 103
-
 ),
 Positions AS
 (
@@ -59,7 +57,6 @@ FROM
     FROM dbo.FactPosition
     INNER JOIN dbo.DimDate
     ON DimDate.CalendarDate = FactPosition.PositionDate
-    WHERE FinancialMonthId = 103
   ) RawPosition
 
 )
