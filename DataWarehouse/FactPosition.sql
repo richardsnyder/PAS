@@ -150,6 +150,7 @@ INNER JOIN DimDate
 ON DimDate.CalendarDate BETWEEN StageData.POS_START AND StageData.POS_END
 WHERE StageData.POS_END IS NOT NULL
 AND NOT EXISTS (SELECT * FROM FactPosition WHERE FactPosition.EmployeeId = StageData.EmployeeId)
+ORDER BY POS_START, POS_END
 
 /* Add the records that have NO POS_END Date
    These will be added for the calendar dates
