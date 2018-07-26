@@ -14,6 +14,7 @@ SELECT FactFte.FinancialMonthId
  ,DimProfitCentre.Chris21_ProfitCentreName
  ,FactFte.PositionTitle FullPositionTitle
   ,LTRIM(RTRIM(REPLACE(FactFte.PositionTitle,FactFte.Chris21ProfitCentre + ' ' + DimProfitCentre.Chris21_ProfitCentreName,'' ))) ShortPositionTitle
+ ,DimAreaManager.AreaManagerId
  ,DimAreaManager.AreaManagerName
  ,DimProfitCentre.DataWarehouse_ProfitCentreName
  ,DimProfitCentre.DataWarehouse_State State
@@ -23,14 +24,16 @@ SELECT FactFte.FinancialMonthId
 FROM FactFte
 LEFT JOIN DimProfitCentre 
 ON DimProfitCentre.Chris21_SourceCode = FactFte.Chris21ProfitCentre
+AND DimProfitCentre.Chris21_BusinessDivisionCode = FactFte.Chris21DivisionCode
 INNER JOIN #FinPeriods FinPeriods
 ON FinPeriods.FinancialMonthId = FactFte.FinancialMonthId
 LEFT JOIN DimAreaManager
-ON DimAreaManager.Chris21ProfitCentre = FactFte.Chris21ProfitCentre
+ON DimAreaManager.AreaManagerId = DimProfitCentre.DataWarehouse_AreaManagerId
 GROUP BY FactFte.FinancialMonthId
          ,FinPeriods.DisplayName
         ,Chris21DivisionCode
         ,FactFte.Chris21ProfitCentre
+        ,DimAreaManager.AreaManagerId
         ,DimAreaManager.AreaManagerName
         ,DimProfitCentre.Chris21_ProfitCentreName
         ,FactFte.PositionTitle

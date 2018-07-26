@@ -27,12 +27,11 @@ AS
   AND FactPosition.EmployeeId = FactTermination.EmployeeId
   INNER JOIN dimdate
   ON DimDate.CalendarDate = FactPosition.PositionDate
-  LEFT JOIN DimAreaManager
-  ON DimAreaManager.AreaManager = FactPosition.POS_INDUSTRY
-  AND DimAreaManager.Chris21ProfitCentre = FactPosition.POS_L5_CD
   INNER JOIN DimProfitCentre
   ON DimProfitCentre.Chris21_ProfitCentreCode = FactPosition.POS_L5_CD
   AND DimProfitCentre.Chris21_BusinessDivisionCode = FactPosition.POS_L2_CD
+  LEFT JOIN DimAreaManager
+  ON DimAreaManager.AreaManagerId = DimProfitCentre.DataWarehouse_AreaManagerId
 )
 
 SELECT DimDate.FinancialMonthId
