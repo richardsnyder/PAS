@@ -42,32 +42,40 @@ WITH FTE AS
 
 Positions AS
 (
-  SELECT DISTINCT
-  EmployeeId
-  ,Employee_Number
-  ,POS_START
-  ,POS_END 
-  ,POS_TITLE
-  ,POS_NUMBER
-  ,POS_L2_CD AS Chris21DivisionCode
-  ,POS_L4_CD AS Chris21PositionCode
-  ,POS_L5_CD AS Chris21ProfitCentre
-  ,POS_L5_CD + POS_L4_CD AS Chris21ProfitCentreSourceKey
-  ,POS_L6_CD AS Chris21State
-  ,RN = ROW_NUMBER()OVER(PARTITION BY EmployeeId ORDER BY EmployeeId)
-  FROM dbo.FactPosition
-  INNER JOIN dbo.DimDate
-  ON DimDate.CalendarDate = FactPosition.PositionDate
---  WHERE DimDate.FinancialMonthId = 102
+SELECT RawPositions.EmployeeId
+ ,RawPositions.Employee_Number
+ ,RawPositions.FinancialMonthId
+ ,RawPositions.POS_TITLE
+ ,RawPositions.Chris21DivisionCode
+ ,RawPositions.Chris21ProfitCentre
+ ,RawPositions.POS_NUMBER
+ ,RawPositions.RN
+FROM 
+(
+    SELECT DISTINCT
+    EmployeeId
+    ,Employee_Number
+    ,FinancialMonthId
+    ,POS_START
+    ,POS_END 
+    ,POS_TITLE
+    ,POS_NUMBER
+    ,POS_L2_CD AS Chris21DivisionCode
+    ,POS_L4_CD AS Chris21PositionCode
+    ,POS_L5_CD AS Chris21ProfitCentre
+    ,POS_L5_CD + POS_L4_CD AS Chris21ProfitCentreSourceKey
+    ,POS_L6_CD AS Chris21State
+    ,RN = ROW_NUMBER()OVER(PARTITION BY FinancialMonthId, EmployeeId, POS_L5_CD ORDER BY FinancialMonthId, EmployeeId,POS_L5_CD)
+    FROM dbo.FactPosition
+    INNER JOIN dbo.DimDate
+    ON DimDate.CalendarDate = FactPosition.PositionDate
+    WHERE 1=1
+  --  AND DimDate.FinancialMonthId = 102
+  --  AND EmployeeId = 2305
+) RawPositions
+WHERE RN =1
 )
 
---SELECT * FROM FTE
---LEFT JOIN Positions
---ON Positions.EmployeeId = FTE.EmployeeId
---AND Positions.RN = 1
---WHERE FinancialMonthId = 90
---AND FTE.EmployeeId IN (361,536,2263,672)
---ORDER BY 1
 
 INSERT INTO dbo.FactFte
            (FinancialMonthId
@@ -93,10 +101,14 @@ SELECT
 FROM FTE
 LEFT JOIN Positions
 ON Positions.EmployeeId = FTE.EmployeeId
+AND FTE.FinancialMonthId = Positions.FinancialMonthId
 AND Positions.RN = 1
 LEFT JOIN DimBusinessDivision
 ON DimBusinessDivision.Chris21_SourceCode = Positions.Chris21DivisionCode
 WHERE FTE.FTE <>0
---AND FinancialMonthId = 90
---AND FTE.EmployeeId IN (361,536,2263,672)
+--AND FinancialMonthId = 102
+--AND Chris21ProfitCentre = 1423
+--AND FTE.EmployeeId IN (2305)
 ORDER BY 1,2
+
+--SELECT * FROM factfte WHERE FinancialMonthId = 102 AND Chris21ProfitCentre = 1423

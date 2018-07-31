@@ -1,8 +1,11 @@
+IF OBJECT_ID('tempdb..#Employees') IS NOT NULL
+  DROP TABLE #Employees
+IF OBJECT_ID('tempdb..#Positions') IS NOT NULL
+  DROP TABLE #Positions
+
 TRUNCATE TABLE dbo.FactHeadCount;
 
-WITH Employees
-AS
-(
+
   SELECT DISTINCT
     DimEmployee.Id
    ,DimEmployee.DET_NUMBER
@@ -10,21 +13,19 @@ AS
    ,DimEmployee.TerminationDate
    ,CASE
       WHEN DimEmployee.DateJoined <= DimDate.FinancialMonthEnd AND
-        (DimEmployee.TerminationDate = '0001-01-02' OR
-        DimEmployee.TerminationDate >= DimDate.FinancialMonthEnd) THEN 1
+        (DimEmployee.TerminationDate = '0001-01-02' OR DimEmployee.TerminationDate >= DimDate.FinancialMonthStart) THEN 1
       ELSE 0
     END HeadCount
    ,DimDate.FinancialMonthId
    ,DimDate.FinancialMonthStart
    ,DimDate.FinancialMonthEnd
+   INTO #Employees
   FROM dbo.DimEmployee DimEmployee
   CROSS JOIN dbo.DimDate
   INNER JOIN FactPosition
   ON FactPosition.EmployeeId = DimEmployee.Id
   AND FactPosition.PositionDate = DimDate.CalendarDate
-),
-Positions AS
-(
+
 SELECT
 FinancialMonthId 
 ,employeeid
@@ -38,7 +39,8 @@ FinancialMonthId
  ,Chris21ProfitCentre
  ,Chris21ProfitCentreSourceKey
  ,Chris21State
- ,RN = ROW_NUMBER()OVER(PARTITION BY EmployeeId ORDER BY FinancialMonthId,POS_START,POS_END)
+ ,RN = ROW_NUMBER()OVER(PARTITION BY FinancialMonthId, EmployeeId ORDER BY FinancialMonthId, EmployeeId,POS_START DESC,POS_END)
+ INTO #Positions
 FROM 
   (  
     SELECT DISTINCT
@@ -59,7 +61,6 @@ FROM
     ON DimDate.CalendarDate = FactPosition.PositionDate
   ) RawPosition
 
-)
 
 INSERT INTO dbo.FactHeadCount
            (FinancialMonthId
@@ -86,11 +87,14 @@ SELECT
   ,Positions.POS_NUMBER
   ,Employees.DateJoined
   ,Employees.TerminationDate
-FROM Employees
-LEFT JOIN Positions
+FROM #Employees Employees
+LEFT JOIN #Positions Positions
 ON Positions.EmployeeId = Employees.Id
 AND Positions.FinancialMonthId = Employees.FinancialMonthId
 LEFT JOIN DimBusinessDivision
 ON DimBusinessDivision.Chris21_SourceCode = Positions.Chris21DivisionCode
 WHERE HeadCount <>0
-ORDER BY 1,2
+AND RN = 1
+ORDER BY 1,2,11
+
+DROP TABLE #Employees, #Positions
