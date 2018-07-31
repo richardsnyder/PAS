@@ -12,6 +12,9 @@ SELECT FactHeadCount.FinancialMonthId
  ,FactHeadCount.Chris21DivisionCode BusinessDivisionCode
  ,FactHeadCount.Chris21ProfitCentre ProfitCentreCode
  ,DimProfitCentre.Chris21_ProfitCentreName
+ ,DimEmployee.DET_NUMBER EmployeeNumber
+ ,DimEmployee.FirstName
+ ,DimEmployee.Surname
  ,FactHeadCount.PositionTitle FullPositionTitle
  ,LTRIM(RTRIM(REPLACE(FactHeadCount.PositionTitle,FactHeadCount.Chris21ProfitCentre + ' ' + DimProfitCentre.Chris21_ProfitCentreName,'' ))) ShortPositionTitle
  ,DimAreaManager.AreaManagerId
@@ -22,6 +25,8 @@ SELECT FactHeadCount.FinancialMonthId
  ,DimProfitCentre.DataWarehouse_ProfitCentreType
  ,SUM(HeadCount) HeadCount
 FROM FactHeadCount
+INNER JOIN DimEmployee
+ON DimEmployee.Id = FactHeadCount.EmployeeId
 LEFT JOIN DimProfitCentre 
 ON DimProfitCentre.Chris21_SourceCode = FactHeadCount.Chris21ProfitCentre
 AND DimProfitCentre.Chris21_BusinessDivisionCode = FactHeadCount.Chris21DivisionCode
@@ -29,9 +34,6 @@ INNER JOIN #FinPeriods FinPeriods
 ON FinPeriods.FinancialMonthId = FactHeadCount.FinancialMonthId
 LEFT JOIN DimAreaManager
 ON DimAreaManager.AreaManagerId = DimProfitCentre.DataWarehouse_AreaManagerId
-
-WHERE FactHeadCount.Chris21DivisionCode = 'bb'
-
 GROUP BY FactHeadCount.FinancialMonthId
          ,FinPeriods.DisplayName
         ,Chris21DivisionCode
@@ -39,6 +41,9 @@ GROUP BY FactHeadCount.FinancialMonthId
         ,DimAreaManager.AreaManagerId
         ,DimAreaManager.AreaManagerName
         ,DimProfitCentre.Chris21_ProfitCentreName
+         ,DimEmployee.DET_NUMBER 
+ ,DimEmployee.FirstName
+ ,DimEmployee.Surname
         ,FactHeadCount.PositionTitle
         ,DimProfitCentre.DataWarehouse_ProfitCentreName
         ,DimProfitCentre.DataWarehouse_State
