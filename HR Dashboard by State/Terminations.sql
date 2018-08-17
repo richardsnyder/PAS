@@ -3,6 +3,10 @@ AS
 (
   SELECT FactTermination.EmployeeId EmployeeId
   ,FactTermination.Employee_Number EmployeeNumber
+  ,DimEmployee.FirstName 
+  ,DimEmployee.Surname LastName
+  ,DimEmployee.DateJoined StartDate
+  ,DimEmployee.TerminationDate EmployeeTermDate
   ,CAST(FactTermination.TER_DATE AS DATE) AS TerminationDate
   ,FactTermination.TER_REAS_CD TermiationReasonCode
   ,CASE
@@ -26,6 +30,8 @@ AS
   INNER JOIN FactPosition
   ON FactPosition.PositionDate = FactTermination.TER_DATE
   AND FactPosition.EmployeeId = FactTermination.EmployeeId
+  INNER JOIN DimEmployee 
+  ON DimEmployee.Id = FactTermination.EmployeeId
   INNER JOIN dimdate
   ON DimDate.CalendarDate = FactPosition.PositionDate
   INNER JOIN DimProfitCentre
@@ -48,11 +54,19 @@ SELECT DimDate.FinancialMonthId
 ,Terminations.TerminationType
 ,Terminations.PositionTitle FullPositionTitle
 ,LTRIM(RTRIM(REPLACE(Terminations.PositionTitle,Terminations.ProfitCentreCode + ' ' + Terminations.ProfitCentreName,'' ))) ShortPositionTitle
+,Terminations.EmployeeId
+,Terminations.EmployeeNumber
+,Terminations.FirstName
+,Terminations.LastName
+,Terminations.StartDate
+,Terminations.TerminationDate
+,DATEDIFF(MONTH,Terminations.StartDate, Terminations.TerminationDate) TenureInMonths
 ,COUNT(Terminations.EmployeeId) CountOfTerminations
 FROM Terminations
 INNER JOIN DimDate
 ON DimDate.CalendarDate = Terminations.TerminationDate
 GROUP BY DimDate.FinancialMonthId
+,Terminations.TerminationDate
 ,Terminations.BusinessDivisionCode
 ,Terminations.ProfitCentreCode
 ,Terminations.ProfitCentreName
@@ -63,6 +77,11 @@ GROUP BY DimDate.FinancialMonthId
 ,Terminations.TermiationReasonCode
 ,Terminations.TerminationType
 ,Terminations.PositionTitle
+,Terminations.EmployeeId
+,Terminations.EmployeeNumber
+,Terminations.FirstName
+,Terminations.LastName
+,Terminations.StartDate
 
 
 --SELECT FactTermination.* FROM FactTermination
