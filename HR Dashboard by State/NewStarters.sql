@@ -8,7 +8,13 @@ SELECT
  ,DimProfitCentre.Chris21_ProfitCentreName
  ,FactPosition.POS_L1_CD Chris21Companycode
  ,FactPosition.POS_L4_CD Chris21PositionType
- ,FactPosition.POS_TITLE FullPositionTitle
+-- ,FactPosition.POS_TITLE FullPositionTitle
+
+  ,Case when CHARINDEX(DimProfitCentre.Chris21_ProfitCentreCode + ' ' + DimProfitCentre.Chris21_ProfitCentreName,FactPosition.POS_TITLE) = 0 
+     Then DimProfitCentre.Chris21_ProfitCentreCode + ' ' + DimProfitCentre.Chris21_BusinessDivisionCode + ' ' + DimProfitCentre.Chris21_ProfitCentreName + ' ' + FactPosition.POS_TITLE
+     ELSE FactPosition.POS_TITLE
+  END AS FullPositionTitle
+
  ,LTRIM(RTRIM(REPLACE(FactPosition.POS_TITLE, FactPosition.POS_L5_CD + ' ' + DimProfitCentre.Chris21_ProfitCentreName, ''))) ShortPositionTitle
  ,DimAreaManager.AreaManagerId
  ,DimAreaManager.AreaManagerName

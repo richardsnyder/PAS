@@ -1,22 +1,31 @@
-IF OBJECT_ID('tempdb..#FinPeriods') IS NOT NULL DROP TABLE #FinPeriods
+IF OBJECT_ID('tempdb..#FinPeriods') IS NOT NULL
+  DROP TABLE #FinPeriods
 
-SELECT DISTINCT DimDate.FinancialMonthId
-, CAST(FinancialYear AS VARCHAR(4)) + ' - '+FinancialMonthName DisplayName
-INTO #FinPeriods
+SELECT DISTINCT
+  DimDate.FinancialMonthId
+ ,CAST(DimDate.FinancialYear AS VARCHAR(4)) + ' - ' + DimDate.FinancialMonthName DisplayName
+ ,DimDate.FinancialMonthStart
+ ,DimDate.FinancialMonthEnd INTO #FinPeriods
 FROM DimDate
-WHERE DimDate.CalendarDate Between DATEADD(YEAR, -3, CAST(GETDATE() AS DATE)) AND DATEADD(YEAR, 1, CAST(GETDATE() AS DATE))
+WHERE DimDate.CalendarDate BETWEEN DATEADD(YEAR, -3, CAST(GETDATE() AS DATE)) AND DATEADD(YEAR, 1, CAST(GETDATE() AS DATE))
 
-SELECT FactHeadCount.FinancialMonthId
+SELECT
+  FactHeadCount.FinancialMonthId
  ,FinPeriods.DisplayName
  ,FactHeadCount.Chris21ProfitCentre + FactHeadCount.Chris21DivisionCode ProfitCentreSourceKey
  ,FactHeadCount.Chris21DivisionCode BusinessDivisionCode
  ,FactHeadCount.Chris21ProfitCentre ProfitCentreCode
  ,DimProfitCentre.Chris21_ProfitCentreName
+ ,DimEmployee.Id EmployeeId
  ,DimEmployee.DET_NUMBER EmployeeNumber
  ,DimEmployee.FirstName
  ,DimEmployee.Surname
  ,FactHeadCount.PositionTitle FullPositionTitle
- ,LTRIM(RTRIM(REPLACE(FactHeadCount.PositionTitle,FactHeadCount.Chris21ProfitCentre + ' ' + DimProfitCentre.Chris21_ProfitCentreName,'' ))) ShortPositionTitle
+ ,Case when CHARINDEX(DimProfitCentre.Chris21_ProfitCentreCode + ' ' + DimProfitCentre.Chris21_ProfitCentreName,FactHeadCount.PositionTitle) = 0 
+     Then DimProfitCentre.Chris21_ProfitCentreCode + ' ' + DimProfitCentre.Chris21_BusinessDivisionCode + ' ' + DimProfitCentre.Chris21_ProfitCentreName + ' ' + FactHeadCount.PositionTitle
+     ELSE FactHeadCount.PositionTitle
+  END AS FullPositionTitle2
+ ,LTRIM(RTRIM(REPLACE(FactHeadCount.PositionTitle, FactHeadCount.Chris21ProfitCentre + ' ' + DimProfitCentre.Chris21_ProfitCentreName, ''))) ShortPositionTitle
  ,DimAreaManager.AreaManagerId
  ,DimAreaManager.AreaManagerName
  ,DimProfitCentre.DataWarehouse_ProfitCentreName
@@ -26,24 +35,27 @@ SELECT FactHeadCount.FinancialMonthId
  ,SUM(HeadCount) HeadCount
 FROM FactHeadCount
 INNER JOIN DimEmployee
-ON DimEmployee.Id = FactHeadCount.EmployeeId
-LEFT JOIN DimProfitCentre 
-ON DimProfitCentre.Chris21_SourceCode = FactHeadCount.Chris21ProfitCentre
-AND DimProfitCentre.Chris21_BusinessDivisionCode = FactHeadCount.Chris21DivisionCode
+  ON DimEmployee.Id = FactHeadCount.EmployeeId
+LEFT JOIN DimProfitCentre
+  ON DimProfitCentre.Chris21_SourceCode = FactHeadCount.Chris21ProfitCentre
+    AND DimProfitCentre.Chris21_BusinessDivisionCode = FactHeadCount.Chris21DivisionCode
 INNER JOIN #FinPeriods FinPeriods
-ON FinPeriods.FinancialMonthId = FactHeadCount.FinancialMonthId
+  ON FinPeriods.FinancialMonthId = FactHeadCount.FinancialMonthId
 LEFT JOIN DimAreaManager
-ON DimAreaManager.AreaManagerId = DimProfitCentre.DataWarehouse_AreaManagerId
+  ON DimAreaManager.AreaManagerId = DimProfitCentre.DataWarehouse_AreaManagerId
 GROUP BY FactHeadCount.FinancialMonthId
-         ,FinPeriods.DisplayName
-        ,Chris21DivisionCode
+        ,FinPeriods.DisplayName
+        ,FactHeadCount.Chris21DivisionCode
         ,FactHeadCount.Chris21ProfitCentre
+        ,DimProfitCentre.Chris21_ProfitCentreCode
+        ,DimProfitCentre.Chris21_BusinessDivisionCode
         ,DimAreaManager.AreaManagerId
         ,DimAreaManager.AreaManagerName
         ,DimProfitCentre.Chris21_ProfitCentreName
-         ,DimEmployee.DET_NUMBER 
- ,DimEmployee.FirstName
- ,DimEmployee.Surname
+        ,DimEmployee.Id
+        ,DimEmployee.DET_NUMBER
+        ,DimEmployee.FirstName
+        ,DimEmployee.Surname
         ,FactHeadCount.PositionTitle
         ,DimProfitCentre.DataWarehouse_ProfitCentreName
         ,DimProfitCentre.DataWarehouse_State

@@ -15,6 +15,12 @@ SELECT
  ,FactFte.Chris21ProfitCentre ProfitCentreCode
  ,DimProfitCentre.Chris21_ProfitCentreName
  ,FactFte.PositionTitle FullPositionTitle
+
+ ,Case when CHARINDEX(DimProfitCentre.Chris21_ProfitCentreCode + ' ' + DimProfitCentre.Chris21_ProfitCentreName,FactFte.PositionTitle) = 0 
+     Then DimProfitCentre.Chris21_ProfitCentreCode + ' ' + DimProfitCentre.Chris21_BusinessDivisionCode + ' ' + DimProfitCentre.Chris21_ProfitCentreName + ' ' + FactFte.PositionTitle
+     ELSE FactFte.PositionTitle
+  END AS FullPositionTitle2
+
  ,LTRIM(RTRIM(REPLACE(FactFte.PositionTitle, FactFte.Chris21ProfitCentre + ' ' + DimProfitCentre.Chris21_ProfitCentreName, ''))) ShortPositionTitle
  ,DimAreaManager.AreaManagerId
  ,DimAreaManager.AreaManagerName
@@ -39,8 +45,10 @@ INNER JOIN DimEmployee
   ON DimEmployee.Id = FactFte.EmployeeId
 GROUP BY FactFte.FinancialMonthId
         ,FinPeriods.DisplayName
-        ,Chris21DivisionCode
+        ,FactFte.Chris21DivisionCode
         ,FactFte.Chris21ProfitCentre
+        ,DimProfitCentre.Chris21_ProfitCentreCode
+        ,DimProfitCentre.Chris21_BusinessDivisionCode
         ,DimAreaManager.AreaManagerId
         ,DimAreaManager.AreaManagerName
         ,DimEmployee.Id

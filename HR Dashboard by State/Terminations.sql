@@ -52,7 +52,11 @@ SELECT DimDate.FinancialMonthId
 ,Terminations.AreaManagerName
 ,Terminations.TermiationReasonCode
 ,Terminations.TerminationType
-,Terminations.PositionTitle FullPositionTitle
+--,Terminations.PositionTitle FullPositionTitle
+,Case when CHARINDEX(Terminations.ProfitCentreCode + ' ' + Terminations.ProfitCentreName,Terminations.PositionTitle) = 0 
+     Then Terminations.ProfitCentreCode + ' ' + Terminations.BusinessDivisionCode + ' ' + Terminations.ProfitCentreName + ' ' + Terminations.PositionTitle
+     ELSE Terminations.PositionTitle
+END AS FullPositionTitle
 ,LTRIM(RTRIM(REPLACE(Terminations.PositionTitle,Terminations.ProfitCentreCode + ' ' + Terminations.ProfitCentreName,'' ))) ShortPositionTitle
 ,Terminations.EmployeeId
 ,Terminations.EmployeeNumber
