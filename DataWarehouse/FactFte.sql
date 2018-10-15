@@ -11,11 +11,18 @@ WITH FTE AS
    ,SUM(FactPayRunSummary.PHQ_BASE_HRS) AS WorkedHours
    ,CAST(SUM(
     CASE
-      WHEN DimEmployee.Pay_PayType IN (30, 31, 33, 34, 35, 36, 50, 52, 53, 54, 55, 56, 57) THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.MonthlyFullTimeHours38Hrs --1
+      WHEN DimEmployee.Pay_PayType BETWEEN 1 AND 8 
+        OR DimEmployee.Pay_PayType BETWEEN 17 AND 22 
+        OR DimEmployee.Pay_PayType BETWEEN 30 AND 49 
+        OR DimEmployee.Pay_PayType BETWEEN 50 AND 69 
+      THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.RetailMonFri38Hrs --1
       WHEN DimEmployee.Pay_PayType IN (32, 51) THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.HrDashboardFortNightHours --2
-      WHEN DimEmployee.Pay_PayType IN (70, 71, 72, 73, 74, 75, 76, 77) THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.RetailMonFri38Hrs --3
-      WHEN DimEmployee.Pay_PayType IN (72) AND FactPosition.POS_AV_HR_WK = 37.5 THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.RetailMonFri375Hrs --4
-      WHEN DimEmployee.Pay_PayType IN (50) AND FactPosition.POS_AV_HR_WK = 37.5 THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.MonthlyFullTimeHours375Hrs --5
+      WHEN DimEmployee.Pay_PayType BETWEEN 9 AND 16
+        OR DimEmployee.Pay_PayType IN (24,25)
+        OR DimEmployee.Pay_PayType BETWEEN 70 AND 99
+      THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.MonthlyFullTimeHours38Hrs --3
+      WHEN DimEmployee.Pay_PayType IN (50) AND FactPosition.POS_AV_HR_WK = 37.5 THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.RetailMonFri375Hrs --4
+      WHEN DimEmployee.Pay_PayType IN (72) AND FactPosition.POS_AV_HR_WK = 37.5 THEN FactPayRunSummary.PHQ_BASE_HRS / DimDate.MonthlyFullTimeHours375Hrs --5
       ELSE FactPayRunSummary.PHQ_BASE_HRS / DimDate.HrDashboardFortNightHours -- Default FTE value when the Paytype is not matched
     END)
     AS NUMERIC(18, 2)) AS FTE
