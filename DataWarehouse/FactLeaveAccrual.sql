@@ -30,7 +30,8 @@ CREATE TABLE #StageData (
  ,LAC_NEXT_ENT NVARCHAR(10) NULL
 )
 
-INSERT INTO #StageData (EmployeeId
+INSERT INTO #StageData (LeaveAccrualChangeDate
+, EmployeeId
 , Employee_Number
 , LAC_LVE_TYPE
 , LAC_AS_AT_DT
@@ -58,8 +59,8 @@ INSERT INTO #StageData (EmployeeId
 , LAC_ADJ_HRS
 , LAC_NEXT_ENT)
 
-  SELECT
-   DimEmployee.Id 
+  SELECT CAST(GETDATE() AS DATE) AS LeaveAccrualChangeDate
+   ,DimEmployee.Id 
    ,Staging_EMLAC.DET_NUMBER
    ,Staging_EMLAC.LAC_LVE_TYPE
    ,CAST(Staging_EMLAC.LAC_AS_AT_DT AS DATE) LAC_AS_AT_DT
@@ -90,67 +91,130 @@ INSERT INTO #StageData (EmployeeId
   INNER JOIN DataWarehouseChris21.dbo.DimEmployee
   ON DimEmployee.DET_NUMBER = Staging_EMLAC.DET_NUMBER
 
-INSERT INTO dbo.FactLeaveAccrual (LeaveAccrualChangeDate
-, EmployeeId
-, Employee_Number
-, LAC_LVE_TYPE
-, LAC_AS_AT_DT
-, LAC_SRV_STRT
-, LAC_ENT_DATE
-, LAC_ACC_DAYS
-, LAC_ACC_HRS
-, LAC_ENT_DAYS
-, LAC_ENT_HRS
-, LAC_CALC_RUN
-, LAC_CUR_AC_D
-, LAC_CUR_AC_H
-, LAC_TOT_DAYS
-, LAC_TOT_HRS
-, LAC_LVE_DAYS
-, LAC_LVE_HRS
-, LAC_PAST_DAY
-, LAC_PAST_HRS
-, LAC_SRV_YRS
-, LAC_SRV_DAYS
-, LAC_CUR_EN_D
-, LAC_CUR_EN_H
-, LAC_LAST_ENT
-, LAC_ADJ_DAYS
-, LAC_ADJ_HRS
-, LAC_NEXT_ENT)
-
-  SELECT
-    CAST(GETDATE() AS DATE) AS LeaveAccrualChangeDate
-   ,EmployeeId
-   ,Employee_Number
-   ,LAC_LVE_TYPE
-   ,LAC_AS_AT_DT
-   ,LAC_SRV_STRT
-   ,LAC_ENT_DATE
-   ,LAC_ACC_DAYS
-   ,LAC_ACC_HRS
-   ,LAC_ENT_DAYS
-   ,LAC_ENT_HRS
-   ,LAC_CALC_RUN
-   ,LAC_CUR_AC_D
-   ,LAC_CUR_AC_H
-   ,LAC_TOT_DAYS
-   ,LAC_TOT_HRS
-   ,LAC_LVE_DAYS
-   ,LAC_LVE_HRS
-   ,LAC_PAST_DAY
-   ,LAC_PAST_HRS
-   ,LAC_SRV_YRS
-   ,LAC_SRV_DAYS
-   ,LAC_CUR_EN_D
-   ,LAC_CUR_EN_H
-   ,LAC_LAST_ENT
-   ,LAC_ADJ_DAYS
-   ,LAC_ADJ_HRS
-   ,LAC_NEXT_ENT
-  FROM #StageData StageData
-  WHERE NOT EXISTS (SELECT *
-    FROM FactLeaveAccrual
-    WHERE FactLeaveAccrual.LAC_CALC_RUN = StageData.LAC_CALC_RUN)
+MERGE  FactLeaveAccrual AS Destination
+USING #StageData AS Source
+ON (Destination.EmployeeId = Source.EmployeeId
+AND Destination.Employee_Number = Source.Employee_Number
+AND Destination.LAC_CALC_RUN = Source.LAC_CALC_RUN
+AND Destination.LeaveAccrualChangeDate=Source.LeaveAccrualChangeDate)
+WHEN NOT MATCHED BY TARGET
+THEN INSERT (
+    LeaveAccrualChangeDate 
+    , EmployeeId 
+    , Employee_Number 
+    , LAC_LVE_TYPE 
+    , LAC_AS_AT_DT 
+    , LAC_SRV_STRT 
+    , LAC_ENT_DATE 
+    , LAC_ACC_DAYS 
+    , LAC_ACC_HRS 
+    , LAC_ENT_DAYS 
+    , LAC_ENT_HRS 
+    , LAC_CALC_RUN 
+    , LAC_CUR_AC_D 
+    , LAC_CUR_AC_H 
+    , LAC_TOT_DAYS 
+    , LAC_TOT_HRS 
+    , LAC_LVE_DAYS 
+    , LAC_LVE_HRS 
+    , LAC_PAST_DAY 
+    , LAC_PAST_HRS 
+    , LAC_SRV_YRS 
+    , LAC_SRV_DAYS 
+    , LAC_CUR_EN_D 
+    , LAC_CUR_EN_H 
+    , LAC_LAST_ENT 
+    , LAC_ADJ_DAYS 
+    , LAC_ADJ_HRS 
+    , LAC_NEXT_ENT
+  )
+  VALUES (Source.LeaveAccrualChangeDate
+  ,Source.EmployeeId 
+  ,Source.Employee_Number 
+  ,Source.LAC_LVE_TYPE 
+  ,Source.LAC_AS_AT_DT 
+  ,Source.LAC_SRV_STRT 
+  ,Source.LAC_ENT_DATE 
+  ,Source.LAC_ACC_DAYS 
+  ,Source.LAC_ACC_HRS 
+  ,Source.LAC_ENT_DAYS 
+  ,Source.LAC_ENT_HRS 
+  ,Source.LAC_CALC_RUN 
+  ,Source.LAC_CUR_AC_D 
+  ,Source.LAC_CUR_AC_H 
+  ,Source.LAC_TOT_DAYS 
+  ,Source.LAC_TOT_HRS 
+  ,Source.LAC_LVE_DAYS 
+  ,Source.LAC_LVE_HRS 
+  ,Source.LAC_PAST_DAY 
+  ,Source.LAC_PAST_HRS 
+  ,Source.LAC_SRV_YRS 
+  ,Source.LAC_SRV_DAYS 
+  ,Source.LAC_CUR_EN_D 
+  ,Source.LAC_CUR_EN_H 
+  ,Source.LAC_LAST_ENT 
+  ,Source.LAC_ADJ_DAYS 
+  ,Source.LAC_ADJ_HRS 
+  ,Source.LAC_NEXT_ENT)
+WHEN MATCHED AND
+(
+  Destination.LeaveAccrualChangeDate=Source.LeaveAccrualChangeDate
+    AND Destination.EmployeeId!=Source.EmployeeId
+    AND Destination.Employee_Number!=Source.Employee_Number
+    AND Destination.LAC_LVE_TYPE!=Source.LAC_LVE_TYPE
+    AND Destination.LAC_AS_AT_DT!=Source.LAC_AS_AT_DT
+    AND Destination.LAC_SRV_STRT!=Source.LAC_SRV_STRT
+    AND Destination.LAC_ENT_DATE!=Source.LAC_ENT_DATE
+    AND Destination.LAC_ACC_DAYS!=Source.LAC_ACC_DAYS
+    AND Destination.LAC_ACC_HRS!=Source.LAC_ACC_HRS
+    AND Destination.LAC_ENT_DAYS!=Source.LAC_ENT_DAYS
+    AND Destination.LAC_ENT_HRS!=Source.LAC_ENT_HRS
+    AND Destination.LAC_CALC_RUN!=Source.LAC_CALC_RUN
+    AND Destination.LAC_CUR_AC_D!=Source.LAC_CUR_AC_D
+    AND Destination.LAC_CUR_AC_H!=Source.LAC_CUR_AC_H
+    AND Destination.LAC_TOT_DAYS!=Source.LAC_TOT_DAYS
+    AND Destination.LAC_TOT_HRS!=Source.LAC_TOT_HRS
+    AND Destination.LAC_LVE_DAYS!=Source.LAC_LVE_DAYS
+    AND Destination.LAC_LVE_HRS!=Source.LAC_LVE_HRS
+    AND Destination.LAC_PAST_DAY!=Source.LAC_PAST_DAY
+    AND Destination.LAC_PAST_HRS!=Source.LAC_PAST_HRS
+    AND Destination.LAC_SRV_YRS!=Source.LAC_SRV_YRS
+    AND Destination.LAC_SRV_DAYS!=Source.LAC_SRV_DAYS
+    AND Destination.LAC_CUR_EN_D!=Source.LAC_CUR_EN_D
+    AND Destination.LAC_CUR_EN_H!=Source.LAC_CUR_EN_H
+    AND Destination.LAC_LAST_ENT!=Source.LAC_LAST_ENT
+    AND Destination.LAC_ADJ_DAYS!=Source.LAC_ADJ_DAYS
+    AND Destination.LAC_ADJ_HRS!=Source.LAC_ADJ_HRS
+    AND Destination.LAC_NEXT_ENT!=Source.LAC_NEXT_ENT
+)
+  THEN UPDATE
+    SET Destination.LeaveAccrualChangeDate=Source.LeaveAccrualChangeDate
+    , Destination.EmployeeId=Source.EmployeeId
+    , Destination.Employee_Number=Source.Employee_Number
+    , Destination.LAC_LVE_TYPE=Source.LAC_LVE_TYPE
+    , Destination.LAC_AS_AT_DT=Source.LAC_AS_AT_DT
+    , Destination.LAC_SRV_STRT=Source.LAC_SRV_STRT
+    , Destination.LAC_ENT_DATE=Source.LAC_ENT_DATE
+    , Destination.LAC_ACC_DAYS=Source.LAC_ACC_DAYS
+    , Destination.LAC_ACC_HRS=Source.LAC_ACC_HRS
+    , Destination.LAC_ENT_DAYS=Source.LAC_ENT_DAYS
+    , Destination.LAC_ENT_HRS=Source.LAC_ENT_HRS
+    , Destination.LAC_CALC_RUN=Source.LAC_CALC_RUN
+    , Destination.LAC_CUR_AC_D=Source.LAC_CUR_AC_D
+    , Destination.LAC_CUR_AC_H=Source.LAC_CUR_AC_H
+    , Destination.LAC_TOT_DAYS=Source.LAC_TOT_DAYS
+    , Destination.LAC_TOT_HRS=Source.LAC_TOT_HRS
+    , Destination.LAC_LVE_DAYS=Source.LAC_LVE_DAYS
+    , Destination.LAC_LVE_HRS=Source.LAC_LVE_HRS
+    , Destination.LAC_PAST_DAY=Source.LAC_PAST_DAY
+    , Destination.LAC_PAST_HRS=Source.LAC_PAST_HRS
+    , Destination.LAC_SRV_YRS=Source.LAC_SRV_YRS
+    , Destination.LAC_SRV_DAYS=Source.LAC_SRV_DAYS
+    , Destination.LAC_CUR_EN_D=Source.LAC_CUR_EN_D
+    , Destination.LAC_CUR_EN_H=Source.LAC_CUR_EN_H
+    , Destination.LAC_LAST_ENT=Source.LAC_LAST_ENT
+    , Destination.LAC_ADJ_DAYS=Source.LAC_ADJ_DAYS
+    , Destination.LAC_ADJ_HRS=Source.LAC_ADJ_HRS
+    , Destination.LAC_NEXT_ENT=Source.LAC_NEXT_ENT
+;
 DROP TABLE #StageData
-
