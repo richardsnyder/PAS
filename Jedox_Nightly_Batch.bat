@@ -210,6 +210,7 @@ echo ***  Starting RTL Update Job Now: %Date_now% %Time_now%  ***  >>%LogFileNam
 echo. >> %LogFileName%
 
 IF %DebugFlag% EQU 0 (
+  call .\etlclient -p "[99-00] Administrative Tasks" -j "[01-07]-load [Cube]:Store Calendar and Store Calendar Week - Store Status Dates" >>%LogFileName%
   call .\etlclient -p "[02-00]-PAS-FINANCIALS [Retail] Store Update and Data Load" -j "Nightly" >>%LogFileName%
 )
 :: NOTE %ERRORLEVEL% is not returning the correct values everything is 0
